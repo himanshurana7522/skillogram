@@ -18,22 +18,28 @@ export default function LoginPage() {
     setSuccess(null);
 
     try {
-      console.log(`Attempting ${isLogin ? 'Login' : 'Signup'} for:`, email);
+      console.log(`[AUTH] Attempting ${isLogin ? 'Login' : 'Signup'} for:`, email);
       const { data, error } = isLogin 
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password });
 
       if (error) {
-        console.error("Auth Error:", error);
+        console.error("[AUTH ERROR]:", error);
+        alert(`Auth Failed: ${error.message}`);
         setError(error.message);
       } else {
-        console.log("Auth Success:", data);
+        console.log("[AUTH SUCCESS]:", data);
         if (!isLogin) {
+          alert("Success! Account created. If you can't log in, check your email for a confirm link.");
           setSuccess("Account created! You can now sign in.");
-          setIsLogin(true); // Switch to login mode
+          setIsLogin(true);
+        } else {
+          alert("Login successful! Redirecting...");
         }
       }
     } catch (err: any) {
+      console.error("[CRASH]:", err);
+      alert("A system error occurred. Check internet connection.");
       setError("An unexpected error occurred.");
     } finally {
       setIsLoading(false);

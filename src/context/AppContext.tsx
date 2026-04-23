@@ -62,7 +62,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function fetchInitialData() {
-      if (!user) return;
+      if (!user) {
+        setIsInitializing(false);
+        return;
+      }
       try {
         // Fetch or create profile
         const { data: profile, error: pError } = await supabase
