@@ -7,7 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import './chat.css';
 
 export default function Chat() {
-  const { isInitializing: isAppInitializing, userProfile, socket, sendMessage, allMessages } = useAppContext();
+  const { isInitializing: isAppInitializing, userProfile, sendMessage, allMessages } = useAppContext();
   const [activeTab, setActiveTab] = useState<'primary' | 'general' | 'nexus'>('primary');
   const [connections, setConnections] = useState<DbUser[]>([]);
   const [activeContact, setActiveContact] = useState<any>(null);
@@ -33,11 +33,7 @@ export default function Chat() {
     fetchConnections();
   }, []);
 
-  useEffect(() => {
-    if (!activeContact || !socket) return;
-    const roomId = getRoomId(userProfile.id, activeContact.id || activeContact.userId);
-    socket.emit('join_room', roomId);
-  }, [activeContact, socket]);
+
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;

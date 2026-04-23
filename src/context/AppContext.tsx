@@ -1,9 +1,8 @@
 'use client';
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { DbUser, DbRoom, DbReel, DbMessage } from '@/lib/db';
-import { io, Socket } from 'socket.io-client';
+import { supabase } from '@/lib/supabaseClient';
 
-const SOCKET_URL = 'http://localhost:4000';
 
 export type AppNotification = {
   id: string;
@@ -29,7 +28,6 @@ type AppContextType = {
   addNotification: (notif: Omit<AppNotification, 'id' | 'time' | 'isRead'>) => void;
   markNotificationsAsRead: () => void;
   unreadCount: number;
-  socket: Socket | null;
   allMessages: Record<string, DbMessage[]>; // ThreadId -> Messages
   sendMessage: (roomId: string, text: string) => void;
 };
@@ -57,85 +55,99 @@ export function AppProvider({ children }: { children: ReactNode }) {
     accountType: 'personal',
     isPrivate: false
   });
-  const [socket, setSocket] = useState<Socket | null>(null);
+
   const [allMessages, setAllMessages] = useState<Record<string, DbMessage[]>>({});
 
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const [roomsRes, profileRes, reelsRes] = await Promise.all([
-          fetch('/api/rooms'),
-          fetch('/api/profile'),
-          fetch('/api/reels'),
+         // Query all data from the real Supabase Postgres
+        const [roomsRes, reelsRes, usersRes] = await Promise.all([
+          supabase.from('rooms').select('*').order('created_at', { ascending: false }),
+          supabase.from('reels').select('*').order('created_at', { ascending: false }),
+          supabase.from('users').select('*').eq('id', 'mock-user-id-to-replace').single()
         ]);
-        const roomsData = await roomsRes.json();
-        const profileData = await profileRes.json();
-        const reelsData = await reelsRes.json();
-
-        setRooms(roomsData.rooms);
-        setUserProfile(profileData.profile);
-        setReels(reelsData.reels);
+        
+        if (roomsRes.data) setRooms(roomsRes.data as any);
+        if (reelsRes.data) setReels(reelsRes.data as any);
+        // If we hooked up real auth, we'd use session.user.id
       } catch (error) {
-        console.error('Failed to load backend data', error);
+        console.error('Failed to load Supabase DB data', error);
       } finally {
         setIsInitializing(false);
       }
     }
     fetchInitialData();
 
-    const newSocket = io(SOCKET_URL);
-    setSocket(newSocket);
+    // Supabase Real-Time Subscriptions for Rooms and Messages
+    const roomsChannel = supabase.channel('public:rooms')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rooms' }, payload => {
+         setRooms(prev => [payload.new as any, ...prev]);
+         addNotification({
+           title: "New Live Orbit!",
+           message: `A new workshop was just initialized.`,
+           type: 'system'
+         });
+      })
+      .subscribe();
 
-    newSocket.on('receive_message', (data: { roomId: string; message: DbMessage }) => {
-      setAllMessages(prev => {
-        const roomMessages = prev[data.roomId] || [];
-        return {
-          ...prev,
-          [data.roomId]: [...roomMessages, data.message]
-        };
-      });
-      
-      // Also add a notification if not on chat
-      addNotification({
-        type: 'message',
-        title: `New Message`,
-        message: data.message.text,
-      });
-    });
+    const messagesChannel = supabase.channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+         const newMsg = payload.new as any;
+         setAllMessages(prev => {
+            const roomMsgs = prev[newMsg.room_id] || [];
+            return {
+               ...prev,
+               [newMsg.room_id]: [...roomMsgs, {
+                  id: newMsg.id,
+                  sender: newMsg.sender_username,
+                  avatar: newMsg.sender_avatar,
+                  text: newMsg.text,
+                  time: new Date(newMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  type: newMsg.type,
+                  isOwn: newMsg.sender_username === userProfile.username
+               }]
+            };
+         });
+         
+         if (newMsg.sender_username !== userProfile.username) {
+            addNotification({
+               type: 'message',
+               title: `New Message from ${newMsg.sender_username}`,
+               message: newMsg.text,
+            });
+         }
+      })
+      .subscribe();
 
     return () => {
-      newSocket.disconnect();
+      supabase.removeChannel(roomsChannel);
+      supabase.removeChannel(messagesChannel);
     };
-  }, []);
+  }, [userProfile.username]);
 
-  const sendMessage = (roomId: string, text: string) => {
-    if (!socket) return;
-    const newMessage: DbMessage = {
-      id: Date.now().toString(),
-      sender: userProfile.username,
-      avatar: userProfile.initials,
-      text,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isOwn: true,
-      type: 'text',
-    };
-
-    socket.emit('send_message', { roomId, message: newMessage });
+  const sendMessage = async (roomId: string, text: string) => {
+    const { error } = await supabase.from('messages').insert([{
+      room_id: roomId,
+      sender_username: userProfile.username,
+      sender_avatar: userProfile.initials,
+      text: text,
+      type: 'text'
+    }]);
+    
+    if (error) console.error("Error sending message:", error);
   };
 
   const addRoom = async (topic: string, type: 'video' | 'audio') => {
     try {
-      const res = await fetch('/api/rooms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, type }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setRooms(prev => [data.room, ...prev]);
-      }
+      const { data, error } = await supabase.from('rooms').insert([
+        { topic, type, participants_count: 1, color: '#2D8CFF' }
+      ]).select().single();
+      
+      if (error) throw error;
+      // State is handled by realtime subscription now!
     } catch (e) {
-      console.error(e);
+      console.error("Supabase insert error:", e);
     }
   };
 
@@ -226,7 +238,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         addNotification,
         markNotificationsAsRead,
         unreadCount,
-        socket,
         allMessages,
         sendMessage,
       }}
