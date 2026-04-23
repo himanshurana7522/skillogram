@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { DbUser, DbRoom, DbReel, DbMessage } from '@/lib/db';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from './AuthContext';
 
 
 export type AppNotification = {
@@ -57,20 +58,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const [allMessages, setAllMessages] = useState<Record<string, DbMessage[]>>({});
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchInitialData() {
+      if (!user) return;
       try {
+        // Fetch or create profile
+        const { data: profile, error: pError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (pError && pError.code === 'PGRST116') {
+          // New User: Create record
+          const newProfile = {
+            id: user.id,
+            name: user.email?.split('@')[0] || 'Unknown Skiller',
+            username: `@${user.email?.split('@')[0] || 'user'}`,
+            initials: (user.email?.[0] || 'U').toUpperCase(),
+            color: '#8B5CF6'
+          };
+          await supabase.from('users').insert([newProfile]);
+          setUserProfile(prev => ({ ...prev, ...newProfile }));
+        } else if (profile) {
+          setUserProfile(profile as any);
+        }
+
          // Query all data from the real Supabase Postgres
-        const [roomsRes, reelsRes, usersRes] = await Promise.all([
+        const [roomsRes, reelsRes] = await Promise.all([
           supabase.from('rooms').select('*').order('created_at', { ascending: false }),
           supabase.from('reels').select('*').order('created_at', { ascending: false }),
-          supabase.from('users').select('*').eq('id', 'mock-user-id-to-replace').single()
         ]);
         
         if (roomsRes.data) setRooms(roomsRes.data as any);
         if (reelsRes.data) setReels(reelsRes.data as any);
-        // If we hooked up real auth, we'd use session.user.id
       } catch (error) {
         console.error('Failed to load Supabase DB data', error);
       } finally {

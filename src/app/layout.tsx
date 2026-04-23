@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { Splash } from "@/components/Splash";
 import { NotificationToast } from "@/components/NotificationToast";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { PageTransition } from "@/components/PageTransition";
 import "./globals.css";
 
@@ -25,16 +26,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AppProvider>
-          <Splash />
-          <Navigation />
-          <NotificationToast />
-          <main className="main-content">
-            <PageTransition>
-              {children}
-            </PageTransition>
-          </main>
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <Splash />
+            <Navigation />
+            <NotificationToast />
+            <main className="main-content">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </main>
+          </AppProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -36,6 +36,8 @@ export function Navigation() {
     { title: 'Portfolio', icon: User, href: '/profile', className: 'profile-link' }
   ];
 
+  if (pathname === '/login') return null;
+
   return (
     <>
       {/* Stellar Floating Sidebar (Desktop) */}

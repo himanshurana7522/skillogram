@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import './Splash.css';
 
 export function Splash() {
   const [show, setShow] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Hide splash screen after animation completes
@@ -14,7 +16,7 @@ export function Splash() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!show) return null;
+  if (!show || pathname === '/login') return null;
 
   return (
     <div className={`splash-container ${!show ? 'hide' : ''}`}>

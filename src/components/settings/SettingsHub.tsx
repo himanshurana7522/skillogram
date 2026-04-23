@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { 
   ChevronLeft, ChevronRight, User, Shield, Lock, Bell, Eye, Heart, 
   DollarSign, Activity, ShieldCheck, Moon, Key, Users, MessageSquare, 
-  Tag, Clock, UserX, AlertTriangle, Monitor, Info, Star
+  Tag, Clock, UserX, AlertTriangle, Monitor, Info, Star, LogOut
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import './settings.css';
 
 interface SettingsHubProps {
@@ -14,6 +15,7 @@ interface SettingsHubProps {
 
 export function SettingsHub({ isOpen, onClose }: SettingsHubProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const { signOut } = useAuth();
 
   if (!isOpen) return null;
 
@@ -93,6 +95,19 @@ export function SettingsHub({ isOpen, onClose }: SettingsHubProps) {
               <SettingsRow icon={<User size={22} color="var(--text-primary)" />} title="Account Status" onClick={() => setActiveCategory('status')} navArrow={renderNavArrow} />
             </div>
 
+            <div className="settings-group">
+              <div className="group-header">Login</div>
+              <SettingsRow 
+                icon={<LogOut size={22} color="#f43f5e" />} 
+                title="Log out" 
+                titleStyle={{ color: '#f43f5e' }}
+                onClick={() => {
+                  signOut();
+                  onClose();
+                }} 
+              />
+            </div>
+
             <div style={{ padding: '20px 30px', textAlign: 'center' }}>
                <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 800 }}>Skillogram Nebula Platform OS</span>
             </div>
@@ -113,13 +128,13 @@ export function SettingsHub({ isOpen, onClose }: SettingsHubProps) {
   );
 }
 
-function SettingsRow({ icon, title, subtitle, onClick, navArrow }: any) {
+function SettingsRow({ icon, title, subtitle, onClick, navArrow, titleStyle }: any) {
   return (
     <div className="settings-item" onClick={onClick}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>{icon}</div>
          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{title}</span>
+            <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', ...titleStyle }}>{title}</span>
             {subtitle && <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{subtitle}</span>}
          </div>
       </div>

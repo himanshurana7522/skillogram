@@ -1,0 +1,117 @@
+/* src/app/login/login.css - Skillogram Nebula Identity */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top right, #1a1033, #020205);
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background decorative blobs */
+.nebula-blob {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: var(--accent-primary);
+  filter: blur(100px);
+  opacity: 0.15;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  z-index: 10;
+  text-align: center;
+}
+
+.login-logo {
+  font-size: 38px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  letter-spacing: -1.5px;
+}
+
+.login-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 35px;
+  font-weight: 500;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input-field {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  padding: 16px 20px;
+  border-radius: 16px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.input-field:focus {
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.btn-auth {
+  margin-top: 10px;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  transition: all 0.3s;
+}
+
+.btn-auth:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+.btn-auth:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  margin-top: 25px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.auth-switch button {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.error-msg {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
