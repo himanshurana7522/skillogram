@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Link2, Grid, Video, Bookmark, Tag, Star, ChevronRight, UserPlus, MoreHorizontal, Settings2, LayoutGrid, Award, Zap } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { SettingsHub } from '@/components/settings/SettingsHub';
 import './profile.css';
@@ -20,11 +22,19 @@ function ProfileSkeleton() {
 
 export default function Profile() {
   const { userProfile, isInitializing } = useAppContext();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('posts');
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [insights, setInsights] = useState<any>(null);
+
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isAuthLoading, router]);
 
   useEffect(() => {
     if (showInsights && !insights) {
@@ -43,7 +53,7 @@ export default function Profile() {
     }
   }, [showInsights, insights]);
 
-  if (isInitializing) return <ProfileSkeleton />;
+  if (isInitializing || isAuthLoading) return <ProfileSkeleton />;
 
   return (
     <div className="skillogram-profile-wrapper animate-fade-in">
@@ -51,10 +61,10 @@ export default function Profile() {
       <header className="skillogram-profile-header">
          <div className="profile-avatar-section">
            <div className="skillogram-avatar-large">
-             <div className="avatar-inner-box">
-                {userProfile.name.charAt(0)}
+             <div className="avatar-inner-box" style={{ background: userProfile.color }}>
+                {userProfile.initials || userProfile.name.charAt(0)}
              </div>
-             {userProfile.username.includes('creator') && (
+             {(userProfile.accountType === 'creator' || userProfile.accountType === 'business') && (
                <div className="skillogram-verified-badge">
                  <Award size={20} color="white" />
                </div>

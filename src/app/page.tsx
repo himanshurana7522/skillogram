@@ -5,6 +5,8 @@ import { CommentsModal } from '@/components/CommentsModal';
 import { StoryBar } from '@/components/social/StoryBar';
 import { PostCard } from '@/components/social/PostCard';
 import { useAppContext } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { DbPost } from '@/lib/db';
 import './page.css';
 
@@ -22,6 +24,8 @@ function PulseSkeleton() {
 
 export default function Home() {
   const { reels } = useAppContext();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
   const [activeView, setActiveView] = useState<'pulse' | 'sphere'>('sphere');
   const [posts, setPosts] = useState<DbPost[]>([]);
   const [isPostsLoading, setIsPostsLoading] = useState(true);
@@ -29,7 +33,13 @@ export default function Home() {
   const [activeCommentsId, setActiveCommentsId] = useState<string | number | null>(null);
 
   useEffect(() => {
-    if (activeView === 'sphere') {
+    if (!isAuthLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isAuthLoading, router]);
+
+  useEffect(() => {
+    if (activeView === 'sphere' && user) {
       async function fetchPosts() {
         setIsPostsLoading(true);
         try {
@@ -46,7 +56,7 @@ export default function Home() {
       }
       fetchPosts();
     }
-  }, [activeView]);
+  }, [activeView, user]);
 
   return (
     <div className="main-feed-container">
