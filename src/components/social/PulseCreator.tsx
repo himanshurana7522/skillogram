@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Zap, Type, Music, Settings, Camera, Image as ImageIcon, Circle, RefreshCw, Sparkles, Wand2 } from 'lucide-react';
+import { X, Zap, Type, Music, Settings, Camera, Image as ImageIcon, Circle, RefreshCw, Sparkles, Wand2, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/context/AuthContext';
 
 interface PulseCreatorProps {
   isOpen: boolean;
@@ -8,9 +10,93 @@ interface PulseCreatorProps {
 }
 
 export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
-  const [activeMode, setActiveMode] = useState<'Post' | 'Story' | 'Reel' | 'Live'>('Reel');
+  const [activeMode, setActiveMode] = useState<'Post' | 'Story' | 'Reel' | 'Live'>('Post');
   const [activeFilter, setActiveFilter] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    if (isOpen) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => stopCamera();
+  }, [isOpen]);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: 1280, height: 720 }, 
+        audio: false 
+      });
+      setVideoStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Camera access error:", err);
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+      setVideoStream(null);
+    }
+  };
+
+  const handleCapture = async () => {
+    if (!videoRef.current || !canvasRef.current || !user) return;
+    setIsUploading(true);
+
+    try {
+      // 1. Capture from Video to Canvas
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // 2. Convert to Blob
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      if (!blob) throw new Error("Canvas capture failed");
+
+      // 3. Upload to Supabase Storage
+      const fileName = `${user.id}/${Date.now()}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('media') // User must create this bucket
+        .upload(fileName, blob);
+
+      if (uploadError) throw uploadError;
+
+      // 4. Get Public URL
+      const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(fileName);
+
+      // 5. Save to Database
+      const { error: dbError } = await supabase.from('posts').insert([{
+        user_id: user.id,
+        media_urls: [publicUrl],
+        type: 'image',
+        caption: `Pulse from Nebula - ${new Date().toLocaleDateString()}`,
+        hashtags: ['nebula', 'pulse']
+      }]);
+
+      if (dbError) throw dbError;
+
+      onClose();
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to sync pulse to cloud.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -27,9 +113,23 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
     <div className="camera-fullscreen-overlay animate-fade-in">
       <div className="camera-viewport" style={{ backgroundColor: '#020205' }}>
         
-        {/* Simulated Camera Viewfinder with Filter */}
+        {/* Real Camera Feed */}
         <div className="camera-feed" style={{ background: filters[activeFilter].color }}>
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            className="video-preview" 
+          />
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
           <div className="crosshair" />
+          
+          {isUploading && (
+            <div className="upload-overlay">
+               <Loader2 className="animate-spin" size={48} color="var(--accent-primary)" />
+               <span>SYNCING PULSE...</span>
+            </div>
+          )}
         </div>
 
         {/* Top Controls */}
@@ -67,12 +167,13 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
              </button>
 
              <div 
-               className={`shutter-btn-wrapper ${isRecording ? 'recording' : ''}`}
+               className={`shutter-btn-wrapper ${isRecording ? 'recording' : ''} ${isUploading ? 'disabled' : ''}`}
                onClick={() => {
+                 if (isUploading) return;
                  if(activeMode === 'Reel' || activeMode === 'Story' || activeMode === 'Live') {
                    setIsRecording(!isRecording);
                  } else {
-                   // simulated snap pop
+                   handleCapture();
                  }
                }}
              >
@@ -184,6 +285,22 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
           text-transform: uppercase; letter-spacing: 1px;
         }
         .mode-text.active { color: white; text-shadow: 0 0 10px white; }
+
+        .video-preview {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .upload-overlay {
+          position: absolute; inset: 0;
+          background: rgba(0,0,0,0.8);
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+          z-index: 100; backdrop-filter: blur(20px);
+        }
+        .upload-overlay span { font-weight: 900; letter-spacing: 2px; color: white; }
+        
+        .shutter-btn-wrapper.disabled { opacity: 0.3; cursor: not-allowed; }
       `}</style>
     </div>
   );
