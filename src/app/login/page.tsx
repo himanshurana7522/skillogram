@@ -9,15 +9,45 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccess(null);
 
-    const { error } = isLogin 
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+    try {
+      console.log(`Attempting ${isLogin ? 'Login' : 'Signup'} for:`, email);
+      const { data, error } = isLogin 
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        console.error("Auth Error:", error);
+        setError(error.message);
+      } else {
+        console.log("Auth Success:", data);
+        if (!isLogin) {
+          setSuccess("Account created! You can now sign in.");
+          setIsLogin(true); // Switch to login mode
+        }
+      }
+    } catch (err: any) {
+      setError("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
 
     if (error) {
       setError(error.message);
@@ -35,6 +65,7 @@ export default function LoginPage() {
         <p>{isLogin ? 'Welcome back to the Nebula.' : 'Join the orbital skill network.'}</p>
         
         {error && <div className="error-msg">{error}</div>}
+        {success && <div className="success-msg" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(16, 185, 129, 0.2)' }}>{success}</div>}
         
         <form className="auth-form" onSubmit={handleAuth}>
           <input 
@@ -60,10 +91,20 @@ export default function LoginPage() {
           </button>
         </form>
         
+        <div className="auth-divider">OR</div>
+
+        <button className="google-btn" onClick={handleGoogleAuth} disabled={isLoading}>
+           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" width="18" />
+           {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
+        </button>
+
         <div className="auth-switch">
           {isLogin ? "Don't have an account?" : "Already a member?"}
-          <button onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? 'Sign Up' : 'Log In'}
+          <button 
+            style={{ display: 'block', margin: '15px auto', fontSize: '15px' }} 
+            onClick={() => setIsLogin(!isLogin)}
+          >
+            {isLogin ? 'Create new account' : 'Log in instead'}
           </button>
         </div>
       </div>
