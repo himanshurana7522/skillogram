@@ -1,0 +1,136 @@
+/* src/app/rooms/rooms.css - Skillogram Nebula Identity */
+.workshop-orbit-wrapper {
+  background: transparent;
+}
+
+.workshop-header-nebula {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 60px;
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  padding: 40px;
+  border-radius: 32px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.workshop-header-nebula h1 { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; }
+.pulse-indicator { display: flex; align-items: center; gap: 12px; color: var(--accent-tertiary); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+.workshop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 30px;
+}
+
+.nebula-session-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.nebula-session-card:hover {
+  transform: translateY(-12px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.host-nebula-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.host-avatar-squircle {
+  width: 60px; height: 60px; 
+  border-radius: 18px; /* Squircle */
+  display: flex; align-items: center; justify-content: center; 
+  font-weight: 900; font-size: 1.5rem; 
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+}
+
+.skiller-count { 
+  background: rgba(16, 185, 129, 0.1); 
+  color: var(--accent-tertiary); 
+  padding: 6px 14px; 
+  border-radius: 12px; 
+  font-size: 11px; 
+  font-weight: 800; 
+  letter-spacing: 1px; 
+}
+
+.session-body h3 { font-size: 22px; font-weight: 800; line-height: 1.3; }
+.session-body p { color: var(--text-muted); font-size: 14px; }
+
+/* Cinematic Session Viewport */
+.nebula-session-viewport {
+  position: fixed; inset: 0; background: #020205; z-index: 3000;
+  display: flex; flex-direction: column;
+}
+
+.session-header-cinematic {
+  padding: 30px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+}
+
+.session-video-stream {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  padding: 30px;
+}
+
+.participant-node {
+  background: #08080C;
+  border-radius: 32px;
+  border: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.participant-placeholder { 
+  width: 140px; height: 140px; 
+  border-radius: 40px; 
+  display: flex; align-items: center; justify-content: center; 
+  font-size: 4rem; font-weight: 900; 
+  border: 4px solid var(--accent-secondary); 
+  background: var(--bg-card);
+  color: white;
+  filter: drop-shadow(0 0 20px var(--accent-secondary));
+}
+
+.session-controls-dock {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  background: rgba(15, 15, 25, 0.8);
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  padding: 18px 40px; 
+  border-radius: 30px;
+  display: flex; gap: 40px; align-items: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+  .workshop-header-nebula { padding: 25px; flex-direction: column; align-items: flex-start; gap: 20px; }
+  .nebula-session-card { padding: 30px; border-radius: 24px; }
+  .session-video-stream { grid-template-columns: 1fr; padding: 15px; }
+  .session-controls-dock { gap: 20px; padding: 15px 25px; width: 90%; justify-content: center; }
+}

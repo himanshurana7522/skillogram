@@ -1,66 +1,123 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Heart, MessageCircle, Share2, MoreHorizontal, Zap } from 'lucide-react';
+import { CommentsModal } from '@/components/CommentsModal';
+import { StoryBar } from '@/components/social/StoryBar';
+import { PostCard } from '@/components/social/PostCard';
+import { useAppContext } from '@/context/AppContext';
+import { DbPost } from '@/lib/db';
+import './page.css';
+
+function PulseSkeleton() {
+  return (
+    <div className="pulse-card">
+      <div className="skeleton-media shimmer" />
+      <div className="pulse-meta">
+        <div className="line-item shimmer short" />
+        <div className="line-item shimmer long" />
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
+  const { reels } = useAppContext();
+  const [activeView, setActiveView] = useState<'pulse' | 'sphere'>('sphere');
+  const [posts, setPosts] = useState<DbPost[]>([]);
+  const [isPostsLoading, setIsPostsLoading] = useState(true);
+  
+  const [activeCommentsId, setActiveCommentsId] = useState<string | number | null>(null);
+
+  useEffect(() => {
+    if (activeView === 'sphere') {
+      async function fetchPosts() {
+        setIsPostsLoading(true);
+        try {
+          const res = await fetch('/api/social/posts');
+          if (res.ok) {
+            const data = await res.json();
+            setPosts(data.posts || []);
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsPostsLoading(false);
+        }
+      }
+      fetchPosts();
+    }
+  }, [activeView]);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="main-feed-container">
+      {/* Skillogram View Toggle */}
+      <div className="feed-header-tabs">
+        <div className="tabs-inner">
+          <button 
+            className={`tab-btn ${activeView === 'sphere' ? 'active' : ''}`}
+            onClick={() => setActiveView('sphere')}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Sphere
+          </button>
+          <button 
+            className={`tab-btn ${activeView === 'pulse' ? 'active' : ''}`}
+            onClick={() => setActiveView('pulse')}
           >
-            Documentation
-          </a>
+            Pulse
+          </button>
         </div>
-      </main>
+      </div>
+
+      <div className="feed-content-scroller">
+        {activeView === 'sphere' ? (
+          /* SPHERE VIEW (Social Feed) */
+          <div className="skillogram-feed-layout">
+            <StoryBar />
+            <div className="posts-list">
+              {isPostsLoading ? (
+                [1, 2].map(i => <div key={i} className="post-skeleton shimmer" />)
+              ) : (
+                posts.map(post => (
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    onCommentClick={(id) => setActiveCommentsId(id)} 
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        ) : (
+          /* PULSE VIEW (Showcases/Reels) */
+          <div className="pulse-feed-layout">
+             {reels.map(reel => (
+                <div key={reel.id} className="pulse-card animate-fade-in">
+                  <div className="pulse-media-container" style={{ background: `linear-gradient(135deg, ${reel.color}22, #000)` }}>
+                    <div className="pulse-top-meta">
+                      <span className="skill-tag">{reel.skill}</span>
+                    </div>
+                    <div className="pulse-sidebar">
+                       <button className="pulse-action-btn"><Heart size={24} /><span>1.2K</span></button>
+                       <button className="pulse-action-btn" onClick={() => setActiveCommentsId(reel.id)}><MessageCircle size={24} /><span>84</span></button>
+                       <button className="pulse-action-btn"><Share2 size={24} /></button>
+                       <button className="pulse-action-btn"><MoreHorizontal size={20} /></button>
+                    </div>
+                    <div className="pulse-bottom-info">
+                       <h3>{reel.author}</h3>
+                       <p>{reel.title}</p>
+                    </div>
+                  </div>
+                </div>
+             ))}
+          </div>
+        )}
+      </div>
+
+      <CommentsModal
+        isOpen={activeCommentsId !== null}
+        onClose={() => setActiveCommentsId(null)}
+        reelId={typeof activeCommentsId === 'number' ? activeCommentsId : null}
+      />
     </div>
   );
 }

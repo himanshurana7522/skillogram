@@ -1,0 +1,92 @@
+/* src/components/EditProfileModal.css - Skillogram Nebula Identity */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.modal-content.glass-pane {
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 40px;
+  padding: 40px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.modal-header h2 { font-size: 24px; font-weight: 900; }
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 32px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.close-btn:hover { color: white; }
+
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edit-split {
+  display: flex;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-input, .edit-profile-form textarea {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 14px;
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.form-input:focus, .edit-profile-form textarea:focus {
+  border-color: var(--accent-primary);
+  background: var(--glass-highlight);
+}
+
+.edit-profile-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+@media (max-width: 768px) {
+  .modal-content.glass-pane { padding: 30px; }
+  .edit-split { flex-direction: column; }
+}

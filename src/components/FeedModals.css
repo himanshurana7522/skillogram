@@ -1,0 +1,166 @@
+/* Slide-up Base CSS */
+.slide-up-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.slide-up-modal {
+  background: var(--bg-deep-black);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding: 24px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slide-up-in 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+  border-top: 1px solid var(--border-light);
+}
+
+@keyframes slide-up-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-drag-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 4px;
+  margin: 0 auto 20px auto;
+}
+
+/* Comments Specific */
+.comments-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.comment-item {
+  display: flex;
+  gap: 12px;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--neon-purple);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.comment-content h4 {
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+  color: var(--text-main);
+}
+
+.comment-content p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.comment-input-area {
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 16px;
+  border-radius: 24px;
+  align-items: center;
+  border: 1px solid var(--border-light);
+}
+
+.comment-input-area input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-main);
+  outline: none;
+}
+
+.comment-input-area button {
+  background: none;
+  border: none;
+  color: var(--neon-blue);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Share Specific */
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.share-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.share-btn .icon-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+}
+
+.share-btn:hover .icon-circle {
+  background: var(--neon-blue);
+  color: white;
+}
+
+.copy-link-area {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.copy-link-area input {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--text-main);
+  outline: none;
+}
+
+.copy-link-area button {
+  padding: 0 20px;
+  background: var(--bg-card);
+  border: none;
+  border-left: 1px solid var(--border-light);
+  color: var(--text-main);
+  font-weight: 600;
+  cursor: pointer;
+}

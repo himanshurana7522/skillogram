@@ -1,0 +1,233 @@
+/* src/app/profile/profile.css - Skillogram Nebula Identity */
+.skillogram-profile-wrapper {
+  min-height: 100vh;
+  padding: calc(var(--nav-height) + 40px) 40px 120px;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  background: transparent;
+}
+
+.skillogram-profile-header {
+  display: flex;
+  gap: 60px;
+  margin-bottom: 60px;
+  background: var(--bg-card);
+  backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  padding: 50px;
+  border-radius: 40px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.profile-avatar-section {
+  flex: 0 0 auto;
+}
+
+.skillogram-avatar-large {
+  width: 160px;
+  height: 160px;
+  border-radius: 45px; /* Squircle */
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 5rem;
+  font-weight: 800;
+  position: relative;
+  box-shadow: 0 15px 30px rgba(139, 92, 246, 0.3);
+}
+
+.avatar-inner-box {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-midnight);
+  border-radius: 42px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.skillogram-verified-badge {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  background: var(--accent-tertiary);
+  padding: 8px;
+  border-radius: 14px;
+  border: 4px solid var(--bg-midnight);
+  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+}
+
+.profile-info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.profile-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-username { 
+  font-size: 32px; 
+  font-weight: 900; 
+  letter-spacing: -1px;
+}
+
+.profile-actions { display: flex; gap: 15px; }
+
+.btn-nebula {
+  background: var(--glass-highlight);
+  border: 1px solid var(--glass-border);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-nebula:hover { 
+  background: var(--accent-primary); 
+  border-color: transparent;
+  transform: translateY(-2px);
+}
+
+.profile-stats {
+  display: flex;
+  gap: 40px;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+}
+.stat-card b { font-size: 20px; color: white; }
+.stat-card span { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+.profile-bio { display: flex; flex-direction: column; gap: 10px; }
+.profile-bio h3 { font-weight: 800; font-size: 20px; color: var(--accent-primary); }
+.bio-category { color: var(--text-secondary); font-size: 14px; font-weight: 700; letter-spacing: 1px; }
+.bio-text { color: var(--text-secondary); line-height: 1.6; max-width: 500px; }
+
+/* Dashboard Banner */
+.professional-dashboard-hub {
+  margin-bottom: 40px;
+  padding: 24px 30px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.professional-dashboard-hub:hover { background: rgba(139, 92, 246, 0.15); transform: scale(1.01); }
+
+/* Tabs */
+.skillogram-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: 50px;
+}
+.skillogram-tabs button {
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 14px; font-weight: 800;
+  padding: 15px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  position: relative;
+}
+.skillogram-tabs button.active {
+  color: var(--accent-primary);
+}
+.skillogram-tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent-primary);
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--accent-primary);
+}
+
+/* Modular Mosaic Grid */
+.skillogram-mosaic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 300px;
+  gap: 20px;
+}
+
+.mosaic-item {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+.mosaic-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mosaic-item.wide { grid-column: span 2; }
+.mosaic-item.tall { grid-row: span 2; }
+
+/* Achievement Nebula Cards */
+.achievement-card {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  padding: 30px;
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: all 0.4s;
+}
+.achievement-card:hover { 
+  border-color: var(--accent-primary); 
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.achievement-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--glass-highlight);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-secondary);
+}
+
+@media (max-width: 1024px) {
+  .skillogram-profile-header { flex-direction: column; gap: 40px; padding: 40px; align-items: center; text-align: center; }
+  .profile-top-bar { flex-direction: column; gap: 20px; }
+  .profile-stats { justify-content: center; }
+  .skillogram-tabs { gap: 30px; }
+  .skillogram-tabs button span { display: none; }
+}
+
+@media (max-width: 768px) {
+  .skillogram-profile-wrapper { padding: 80px 20px 120px; }
+  .stat-card b { font-size: 16px; }
+  .stat-card span { font-size: 11px; }
+  .skillogram-mosaic-grid { grid-template-columns: 1fr; grid-auto-rows: 250px; }
+}

@@ -1,0 +1,95 @@
+.settings-options {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.setting-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 16px;
+}
+
+.setting-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.setting-menu-item span {
+  flex: 1;
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+
+.setting-menu-item .chevron {
+  color: var(--text-muted);
+}
+
+.s-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-info h4 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.setting-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Toggle Switch CSS */
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background-color: var(--border-light);
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.toggle-switch.active {
+  background-color: var(--neon-blue);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch.active::after {
+  transform: translateX(20px);
+}

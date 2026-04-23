@@ -1,0 +1,46 @@
+/* Splash.css */
+.splash-container {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: var(--bg-deep-black);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: fade-out 0.5s ease-in-out 2s forwards;
+}
+
+.splash-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--neon-purple);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inner-glow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--neon-blue);
+  filter: blur(8px);
+}
+
+.splash-text {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #FFFFFF, var(--text-muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slide-in-bottom 0.8s ease-out forwards;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; visibility: visible; }
+  to { opacity: 0; visibility: hidden; }
+}

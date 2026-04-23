@@ -1,0 +1,152 @@
+/* src/app/page.css - Skillogram Nebula Identity */
+.main-feed-container {
+  min-height: 100vh;
+  background-color: transparent;
+}
+
+.feed-header-tabs {
+  position: sticky;
+  top: calc(var(--nav-height) + 20px);
+  width: fit-content;
+  margin: 0 auto 40px;
+  padding: 6px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  z-index: 100;
+}
+
+.tabs-inner {
+  display: flex;
+  gap: 4px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 10px 24px;
+  border-radius: 16px;
+  transition: all 0.3s;
+}
+
+.tab-btn.active {
+  background: var(--accent-primary);
+  color: white;
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+}
+
+.skillogram-feed-layout {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* PULSE VIEW (Unique Full-Screen Cards) */
+.pulse-feed-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+  padding: 0 20px;
+}
+
+.pulse-card {
+  height: 600px;
+  border-radius: 32px;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  transition: transform 0.3s ease;
+}
+
+.pulse-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--accent-secondary);
+}
+
+.pulse-media-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.pulse-sidebar {
+  position: absolute;
+  right: 20px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 10;
+}
+
+.pulse-action-btn {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pulse-action-btn:hover {
+  background: var(--accent-primary);
+}
+
+.pulse-action-btn span {
+  font-size: 10px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.pulse-bottom-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 40px 30px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
+}
+
+.pulse-bottom-info h3 { font-size: 20px; margin-bottom: 8px; color: var(--text-primary); }
+.pulse-bottom-info p { font-size: 14px; color: var(--text-secondary); }
+
+.skill-tag {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  padding: 8px 16px;
+  background: rgba(139, 92, 246, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--accent-primary);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+  .feed-header-tabs { top: 90px; }
+  .pulse-feed-layout { grid-template-columns: 1fr; }
+  .pulse-card { height: calc(100vh - 250px); }
+}

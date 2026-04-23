@@ -1,34 +1,30 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Skillogram Nebula Palette (Distinct Social Identity) */
+  --bg-midnight: #050508;
+  --bg-secondary: #0A0A0F;
+  --bg-card: rgba(15, 15, 25, 0.7);
+  
+  --accent-primary: #8B5CF6; /* Vibrant Violet */
+  --accent-secondary: #3B82F6; /* Electric Blue */
+  --accent-tertiary: #10B981; /* Emerald Glow */
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+  
+  --error: #EF4444;
+  
+  /* Modern Premium Font */
+  --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* App-specific layout constants */
+  --nav-height: 72px;
+  --dock-height: 80px;
+  --content-max-width: 1200px;
 }
 
 * {
@@ -37,13 +33,172 @@ body {
   margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+html, body {
+  background-color: var(--bg-midnight);
+  color: var(--text-primary);
+  font-family: var(--font-stack);
+  overflow-x: hidden;
+  height: 100%;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+body {
+  /* Mesh Gradient Background for uniqueness */
+  background: 
+    radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+    var(--bg-midnight);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Core Layout Wrapping */
+.main-content {
+  padding-top: calc(var(--nav-height) + 40px);
+  padding-bottom: 40px;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    /* Accounts for 70px top-bar and 80px bottom dock + breathing room */
+    padding-top: 90px;
+    padding-bottom: calc(var(--dock-height) + 40px); 
   }
+}
+
+/* Glassmorphism Utilities */
+.glass-pane {
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+}
+
+/* Neon Utility Classes */
+.glow-primary {
+  filter: drop-shadow(0 0 10px var(--accent-primary));
+}
+
+.glow-secondary {
+  filter: drop-shadow(0 0 10px var(--accent-secondary));
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-nebula {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: nebula-flow 8s linear infinite;
+}
+
+@keyframes nebula-flow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.squircle-avatar {
+  border-radius: 28%; /* Classic Squircle */
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+}
+
+/* Buttons (Unique UI) */
+.btn-stellar {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+}
+
+.btn-stellar:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+}
+
+.btn-secondary {
+  background: var(--glass-highlight);
+  border: 1px solid var(--glass-border);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  background: var(--glass-border);
+  transform: translateY(-2px);
+}
+
+/* Skeletons (Nebula Shimmer) */
+@keyframes nebula-shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.skeleton {
+  background: var(--glass-highlight);
+  animation: nebula-shimmer 2s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+  animation: shimmer-move 2s infinite;
+}
+
+@keyframes shimmer-move {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

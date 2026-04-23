@@ -1,0 +1,142 @@
+/* src/components/settings/settings.css - Skillogram Nebula Identity */
+.settings-hub-container {
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  background: var(--bg-midnight);
+  display: flex;
+  flex-direction: column;
+  animation: slideLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.settings-nav {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--glass-border);
+  gap: 30px;
+}
+
+.back-btn {
+  background: var(--glass-highlight);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.back-btn:hover { background: var(--glass-border); }
+
+.settings-nav h3 { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+
+.settings-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.settings-group {
+  margin-bottom: 50px;
+}
+
+.group-header {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  padding-left: 20px;
+}
+
+.account-center-mockup {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 30px;
+  margin-bottom: 40px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.account-center-mockup:hover {
+  background: var(--glass-highlight);
+  border-color: var(--accent-primary);
+  transform: translateY(-4px);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: transparent;
+  border-radius: 16px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-item:hover {
+  background: var(--glass-highlight);
+}
+
+
+.item-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--bg-midnight);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.item-title { font-size: 17px; font-weight: 700; color: white; }
+.item-subtitle { font-size: 13px; color: var(--text-secondary); }
+
+/* Toggles & Custom UI */
+.toggle-switch {
+  width: 54px;
+  height: 28px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  padding: 4px;
+  cursor: pointer;
+  transition: 0.44s;
+  border: 1px solid var(--glass-border);
+}
+.toggle-switch.active { background: var(--accent-primary); border-color: transparent; }
+.switch-knob {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.44s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.toggle-switch.active .switch-knob { transform: translateX(26px); }
+
+@media (max-width: 768px) {
+  .settings-nav { padding: 0 20px; }
+  .settings-list { padding: 30px 15px; }
+  .settings-item { padding: 18px; gap: 15px; }
+  .item-icon { width: 44px; height: 44px; padding: 0; }
+  .item-title { font-size: 15px; }
+}
