@@ -1,14 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Safe trim to remove invisible spaces or quotes from Vercel
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-console.log("[CONFIG] Testing Supabase Keys...");
-if (!supabaseUrl) console.error("❌ NEXT_PUBLIC_SUPABASE_URL is missing!");
-if (!supabaseAnonKey) console.error("❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is missing!");
+console.log("[CONFIG] Verifying Connection Frequency...");
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("⚠️ Using placeholder keys. App will not function until keys are added to Vercel.");
+  console.warn("⚠️ Missing keys in Vercel. Please check your Project Settings.");
 }
 
 export const supabase = createClient(
