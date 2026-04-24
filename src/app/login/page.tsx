@@ -11,6 +11,30 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const [pingStatus, setPingStatus] = useState<string>('Testing connection...');
+
+  React.useEffect(() => {
+    async function testConnection() {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        setPingStatus("❌ URL Missing");
+        return;
+      }
+      try {
+        const start = Date.now();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`);
+        const duration = Date.now() - start;
+        if (res.ok || res.status === 401) {
+          setPingStatus(`🟢 LATENCY: ${duration}ms (Authenticated: ${res.status !== 401})`);
+        } else {
+          setPingStatus(`🟠 STATUS: ${res.status}`);
+        }
+      } catch (err: any) {
+        setPingStatus(`🔴 NETWORK ERROR: ${err.message}`);
+      }
+    }
+    testConnection();
+  }, []);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -70,9 +94,14 @@ export default function LoginPage() {
         <h1 className="login-logo text-gradient">Skillogram<span>.</span></h1>
         <p>{isLogin ? 'Welcome back to the Nebula.' : 'Join the orbital skill network.'}</p>
         
-        {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) && (
+        {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ? (
           <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-            <strong>CRITICAL ERROR:</strong> Your Vercel Environment Variables are missing or not prefixing with <code>NEXT_PUBLIC_</code>.
+            <strong>CRITICAL ERROR:</strong> Your Vercel Environment Variables are missing.
+          </div>
+        ) : (
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-muted)', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '11px', lineHeight: '1.6' }}>
+            <div style={{ marginBottom: '5px' }}>📡 <strong>NODE:</strong> {process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 15)}...</div>
+            <div style={{ fontSize: '10px', color: pingStatus.includes('🔴') ? '#ef4444' : '#10b981', fontWeight: 800 }}>{pingStatus}</div>
           </div>
         )}
 
