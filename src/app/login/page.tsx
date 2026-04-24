@@ -70,6 +70,12 @@ export default function LoginPage() {
         <h1 className="login-logo text-gradient">Skillogram<span>.</span></h1>
         <p>{isLogin ? 'Welcome back to the Nebula.' : 'Join the orbital skill network.'}</p>
         
+        {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) && (
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            <strong>CRITICAL ERROR:</strong> Your Vercel Environment Variables are missing or not prefixing with <code>NEXT_PUBLIC_</code>.
+          </div>
+        )}
+
         {error && <div className="error-msg">{error}</div>}
         {success && <div className="success-msg" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(16, 185, 129, 0.2)' }}>{success}</div>}
         
