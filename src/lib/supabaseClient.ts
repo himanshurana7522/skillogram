@@ -1,13 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Safe trim to remove invisible spaces or quotes from Vercel
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+// Deep sanitize to remove ANY junk characters, spaces, or quotes
+const sanitizeValue = (val: string | undefined) => {
+  if (!val) return '';
+  return val.replace(/['"]+/g, '').trim().replace(/\/$/, '');
+};
 
-console.log("[CONFIG] Verifying Connection Frequency...");
+let rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+// Fix double https:// if pasted by accident
+if (rawUrl.startsWith('https://https://')) {
+  rawUrl = rawUrl.replace('https://https://', 'https://');
+}
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("⚠️ Missing keys in Vercel. Please check your Project Settings.");
+const supabaseUrl = sanitizeValue(rawUrl);
+const supabaseAnonKey = sanitizeValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+console.log("[CONFIG] Project Signal Status:", supabaseUrl ? 'ACTIVE' : 'DISCONNECTED');
+if (supabaseUrl) {
+  console.log(`[CONFIG] URL: ${supabaseUrl.substring(0, 15)}...`);
+}
+if (supabaseAnonKey) {
+  console.log(`[CONFIG] Key Prefix: ${supabaseAnonKey.substring(0, 10)}... (Length: ${supabaseAnonKey.length})`);
+}
+
+if (!supabaseUrl || !supabaseAnonKey || supabaseAnonKey === 'placeholder') {
+  console.warn("⚠️ Signal lost. Check Vercel project environment variables or .env.local.");
 }
 
 export const supabase = createClient(

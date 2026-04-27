@@ -17,6 +17,8 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [caption, setCaption] = useState('');
   const { user } = useAuth();
 
   React.useEffect(() => {
@@ -50,49 +52,58 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
     }
   };
 
-  const handleCapture = async () => {
-    if (!videoRef.current || !canvasRef.current || !user) return;
+   const handleCapture = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    setCapturedImage(dataUrl);
+    stopCamera();
+  };
+
+  const handleUpload = async () => {
+    if (!capturedImage || !user) return;
     setIsUploading(true);
 
     try {
-      // 1. Capture from Video to Canvas
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // 1. Convert DataURL to Blob
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
 
-      // 2. Convert to Blob
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-      if (!blob) throw new Error("Canvas capture failed");
-
-      // 3. Upload to Supabase Storage
+      // 2. Upload to Supabase Storage
       const fileName = `${user.id}/${Date.now()}.jpg`;
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media') // User must create this bucket
+        .from('media')
         .upload(fileName, blob);
 
       if (uploadError) throw uploadError;
 
-      // 4. Get Public URL
+      // 3. Get Public URL
       const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(fileName);
 
-      // 5. Save to Database
+      // 4. Save to Database
       const { error: dbError } = await supabase.from('posts').insert([{
         user_id: user.id,
         media_urls: [publicUrl],
         type: 'image',
-        caption: `Pulse from Nebula - ${new Date().toLocaleDateString()}`,
+        caption: caption || `Pulse from Nebula - ${new Date().toLocaleDateString()}`,
         hashtags: ['nebula', 'pulse']
       }]);
 
       if (dbError) throw dbError;
 
       onClose();
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("Failed to sync pulse to cloud.");
+      window.location.href = '/'; 
+    } catch (err: any) {
+      console.error("Upload error details:", err);
+      const msg = err.message || "Unknown error";
+      alert(`FAILED TO SYNC: ${msg}\n\n(Tip: Ensure bucket 'media' exists and has Public Upload policies)`);
     } finally {
       setIsUploading(false);
     }
@@ -113,16 +124,20 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
     <div className="camera-fullscreen-overlay animate-fade-in">
       <div className="camera-viewport" style={{ backgroundColor: '#020205' }}>
         
-        {/* Real Camera Feed */}
+        {/* Real Camera Feed or Captured Image */}
         <div className="camera-feed" style={{ background: filters[activeFilter].color }}>
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            className="video-preview" 
-          />
+          {capturedImage ? (
+            <img src={capturedImage} alt="captured" className="video-preview" />
+          ) : (
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              playsInline 
+              className="video-preview" 
+            />
+          )}
           <canvas ref={canvasRef} style={{ display: 'none' }} />
-          <div className="crosshair" />
+          {!capturedImage && <div className="crosshair" />}
           
           {isUploading && (
             <div className="upload-overlay">
@@ -134,9 +149,22 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
 
         {/* Top Controls */}
         <header className="camera-top-bar">
-          <button className="cam-icon-btn" onClick={onClose}><X size={28} /></button>
-          <button className="cam-icon-btn" style={{ background: 'rgba(255,255,255,0.15)' }}><Zap size={22} fill="white" /></button>
-          <button className="cam-icon-btn"><Settings size={28} /></button>
+          <button className="cam-icon-btn" onClick={() => {
+            if (capturedImage) {
+              setCapturedImage(null);
+              startCamera();
+            } else {
+              onClose();
+            }
+          }}>
+            <X size={28} />
+          </button>
+          {!capturedImage && (
+            <>
+              <button className="cam-icon-btn" style={{ background: 'rgba(255,255,255,0.15)' }}><Zap size={22} fill="white" /></button>
+              <button className="cam-icon-btn"><Settings size={28} /></button>
+            </>
+          )}
         </header>
 
         {/* Left Toolbar (Like Instagram/Tiktok) */}
@@ -150,54 +178,75 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
         {/* Bottom Controls */}
         <footer className="camera-bottom-panel">
           
-          <div className="filter-carousel">
-             {filters.map((f, i) => (
-                <div key={f.name} className={`filter-blob ${i === activeFilter ? 'active' : ''}`} onClick={() => setActiveFilter(i)}>
-                  <div className="blob-inner" style={{ background: f.color !== 'transparent' ? f.color : '#333' }}>
-                     {i === 0 && <Camera size={14} />}
-                  </div>
-                  <span>{f.name}</span>
-                </div>
-             ))}
-          </div>
+          {!capturedImage ? (
+            <>
+              <div className="filter-carousel">
+                 {filters.map((f, i) => (
+                    <div key={f.name} className={`filter-blob ${i === activeFilter ? 'active' : ''}`} onClick={() => setActiveFilter(i)}>
+                      <div className="blob-inner" style={{ background: f.color !== 'transparent' ? f.color : '#333' }}>
+                         {i === 0 && <Camera size={14} />}
+                      </div>
+                      <span>{f.name}</span>
+                    </div>
+                 ))}
+              </div>
 
-          <div className="camera-actions">
-             <button className="gallery-btn" onClick={() => alert("Navigating to Camera Roll...")}>
-                <ImageIcon size={24} />
-             </button>
+              <div className="camera-actions">
+                 <button className="gallery-btn" onClick={() => alert("Navigating to Camera Roll...")}>
+                    <ImageIcon size={24} />
+                 </button>
 
-             <div 
-               className={`shutter-btn-wrapper ${isRecording ? 'recording' : ''} ${isUploading ? 'disabled' : ''}`}
-               onClick={() => {
-                 if (isUploading) return;
-                 if(activeMode === 'Reel' || activeMode === 'Story' || activeMode === 'Live') {
-                   setIsRecording(!isRecording);
-                 } else {
-                   handleCapture();
-                 }
-               }}
-             >
-                <div className="shutter-outer">
-                   <div className="shutter-inner" />
-                </div>
-             </div>
+                 <div 
+                   className={`shutter-btn-wrapper ${isRecording ? 'recording' : ''} ${isUploading ? 'disabled' : ''}`}
+                   onClick={() => {
+                     if (isUploading) return;
+                     if(activeMode === 'Reel' || activeMode === 'Story' || activeMode === 'Live') {
+                       setIsRecording(!isRecording);
+                     } else {
+                       handleCapture();
+                     }
+                   }}
+                 >
+                    <div className="shutter-outer">
+                       <div className="shutter-inner" />
+                    </div>
+                 </div>
 
-             <button className="flip-btn" onClick={() => alert("Flipping to front/rear camera...")}>
-                <RefreshCw size={24} />
-             </button>
-          </div>
+                 <button className="flip-btn" onClick={() => alert("Flipping to front/rear camera...")}>
+                    <RefreshCw size={24} />
+                 </button>
+              </div>
 
-          <div className="camera-modes">
-             {modes.map(mode => (
-               <button 
-                 key={mode} 
-                 className={`mode-text ${activeMode === mode ? 'active' : ''}`}
-                 onClick={() => setActiveMode(mode)}
-               >
-                 {mode}
-               </button>
-             ))}
-          </div>
+              <div className="camera-modes">
+                 {modes.map(mode => (
+                   <button 
+                     key={mode} 
+                     className={`mode-text ${activeMode === mode ? 'active' : ''}`}
+                     onClick={() => setActiveMode(mode)}
+                   >
+                     {mode}
+                   </button>
+                 ))}
+              </div>
+            </>
+          ) : (
+            <div className="review-panel animate-slide-up">
+              <input 
+                type="text" 
+                placeholder="Write a caption..." 
+                className="caption-input"
+                autoFocus
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+              />
+              <div className="review-btns">
+                <button className="btn-discard" onClick={() => { setCapturedImage(null); startCamera(); }}>Discard</button>
+                <button className="btn-share" onClick={handleUpload} disabled={isUploading}>
+                  {isUploading ? 'Posting...' : 'Share to Nebula'}
+                </button>
+              </div>
+            </div>
+          )}
         </footer>
       </div>
 
@@ -301,6 +350,57 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
         .upload-overlay span { font-weight: 900; letter-spacing: 2px; color: white; }
         
         .shutter-btn-wrapper.disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .review-panel {
+          width: 100%;
+          padding: 20px;
+          background: rgba(0,0,0,0.8);
+          backdrop-filter: blur(20px);
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+        .caption-input {
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
+          padding: 12px 16px;
+          color: white;
+          width: 100%;
+          font-size: 14px;
+        }
+        .review-btns {
+          display: flex;
+          gap: 12px;
+        }
+        .btn-discard {
+          flex: 1;
+          background: rgba(255,255,255,0.1);
+          border: none;
+          color: white;
+          padding: 14px;
+          border-radius: 12px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .btn-share {
+          flex: 2;
+          background: var(--accent-primary);
+          border: none;
+          color: white;
+          padding: 14px;
+          border-radius: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+        .animate-slide-up {
+          animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideUp {
+          from { transform: translateY(100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
       `}</style>
     </div>
   );

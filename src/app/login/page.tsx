@@ -15,16 +15,19 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     async function testConnection() {
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      let raw = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const cleanUrl = raw.replace(/['"]+/g, '').trim().replace(/\/$/, '').replace('https://https://', 'https://');
+      
+      if (!cleanUrl) {
         setPingStatus("❌ URL Missing");
         return;
       }
       try {
         const start = Date.now();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`);
+        const res = await fetch(`${cleanUrl}/auth/v1/health`);
         const duration = Date.now() - start;
         if (res.ok || res.status === 401) {
-          setPingStatus(`🟢 LATENCY: ${duration}ms (Authenticated: ${res.status !== 401})`);
+          setPingStatus(`🟢 LATENCY: ${duration}ms (Signal Locked)`);
         } else {
           setPingStatus(`🟠 STATUS: ${res.status}`);
         }
@@ -49,13 +52,20 @@ export default function LoginPage() {
 
       if (error) {
         console.error("[AUTH ERROR]:", error);
-        alert(`Auth Failed: ${error.message}`);
+        // Provide more context in the alert
+        alert(`Auth Failed: ${error.message} (${error.status || 'unknown status'})`);
         setError(error.message);
       } else {
         console.log("[AUTH SUCCESS]:", data);
         if (!isLogin) {
-          alert("Success! Account created. If you can't log in, check your email for a confirm link.");
-          setSuccess("Account created! You can now sign in.");
+          const isEmailConfirmed = data.user?.email_confirmed_at;
+          if (isEmailConfirmed) {
+            alert("Success! Account created. You are now logged in.");
+            setSuccess("Account created! You can now sign in.");
+          } else {
+            alert("Success! Account created. If login fails, check your email or verify if confirmation is required.");
+            setSuccess("Account created! Check your email if required.");
+          }
           setIsLogin(true);
         } else {
           alert("Login successful! Redirecting...");
@@ -63,8 +73,8 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error("[CRASH]:", err);
-      alert("A system error occurred. Check internet connection.");
-      setError("An unexpected error occurred.");
+      alert(`A system error occurred: ${err.message}`);
+      setError(`An unexpected error occurred: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -94,16 +104,6 @@ export default function LoginPage() {
         <h1 className="login-logo text-gradient">Skillogram<span>.</span></h1>
         <p>{isLogin ? 'Welcome back to the Nebula.' : 'Join the orbital skill network.'}</p>
         
-        {(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ? (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-            <strong>CRITICAL ERROR:</strong> Your Vercel Environment Variables are missing.
-          </div>
-        ) : (
-          <div style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-muted)', padding: '15px', borderRadius: '12px', marginBottom: '20px', fontSize: '11px', lineHeight: '1.6' }}>
-            <div style={{ marginBottom: '5px' }}>📡 <strong>NODE:</strong> {process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 15)}...</div>
-            <div style={{ fontSize: '10px', color: pingStatus.includes('🔴') ? '#ef4444' : '#10b981', fontWeight: 800 }}>{pingStatus}</div>
-          </div>
-        )}
 
         {error && <div className="error-msg">{error}</div>}
         {success && <div className="success-msg" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(16, 185, 129, 0.2)' }}>{success}</div>}
@@ -132,12 +132,6 @@ export default function LoginPage() {
           </button>
         </form>
         
-        <div className="auth-divider">OR</div>
-
-        <button className="google-btn" onClick={handleGoogleAuth} disabled={isLoading}>
-           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" width="18" />
-           {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
-        </button>
 
         <div className="auth-switch">
           {isLogin ? "Don't have an account?" : "Already a member?"}
