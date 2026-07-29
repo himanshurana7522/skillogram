@@ -66,7 +66,7 @@ export function PostCard({ post, onCommentClick }: PostCardProps) {
       </div>
 
       <div className="post-content-area">
-        <span className="stats-text">{post.likes.length + (isLiked ? 1 : 0)} skillers engaged</span>
+        <span className="stats-text">{post.likes + (isLiked ? 1 : 0)} skillers engaged</span>
         <div className="stellar-caption">
           <b>{post.authorName}</b> {post.caption}
         </div>

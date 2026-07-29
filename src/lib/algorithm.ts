@@ -1,43 +1,4 @@
-import { DbUser, MOCK_DB } from './db';
-
-
-
-export function rankContent<T extends { userId?: string; authorId?: string; views?: string; likes?: unknown[]; createdAt?: string }>(viewer: DbUser, contentList: T[]): T[] {
-  const ranked = contentList.map(item => {
-    let score = 0;
-    
-    // 1. Relationship Factor (Instagram: Following weight)
-    const isFollowing = MOCK_DB.connections.includes((item.userId || item.authorId) as string);
-    if (isFollowing) score += 50;
-
-    // 2. Skill Swap Relevance (SkillSwap specific intelligence)
-    const author = MOCK_DB.userPool.find(u => u.id === (item.userId || item.authorId)) || MOCK_DB.profile;
-    const skillOverlap = author.teachingSkills.some(s => viewer.learningSkills.includes(s));
-    if (skillOverlap) score += 40;
-
-    // 3. Global Popularity (Views/Likes)
-    const hotness = parseInt(item.views || '0') / 1000 + (item.likes?.length || 0);
-    score += hotness;
-
-    // 4. Recency (Simplified)
-    if (item.createdAt === 'Just now') score += 100;
-
-    return { score, item };
-  });
-
-  return ranked.sort((a, b) => b.score - a.score).map(r => r.item);
-}
-
-export function rankExploreGrid<T extends { category?: string }>(viewer: DbUser, exploreItems: T[]): T[] {
-  // Personalized explore sorting based on search history and categories
-  const searchHistory = MOCK_DB.activity.searchHistory.map(s => s.toLowerCase());
-  
-  return [...exploreItems].sort((a, b) => {
-    const aMatch = searchHistory.some(s => a.category?.includes(s)) ? 1 : 0;
-    const bMatch = searchHistory.some(s => b.category?.includes(s)) ? 1 : 0;
-    return bMatch - aMatch;
-  });
-}
+import { DbUser } from './db';
 
 export type MatchResult = {
   user: DbUser;
