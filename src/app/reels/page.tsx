@@ -1,12 +1,14 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
-import { Heart, MessageCircle, Send, MoreVertical, Music, Camera, Share } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Heart, MessageCircle, Send, MoreVertical, Music, Camera } from 'lucide-react';
 import './reels.css';
-import { useAppContext } from '@/context/AppContext';
+import { useUser } from '@/context/UserContext';
+import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
 
 export default function Reels() {
-  const { isInitializing } = useAppContext();
-  const [reels, setReels] = useState<any[]>([]);
+  const { isInitializing } = useUser();
+  const [reels, setReels] = useState<{ id?: string; author?: string; color?: string; title?: string; likes?: number; comments?: number; }[]>([]);
 
   useEffect(() => {
     async function fetchReels() {
@@ -14,7 +16,12 @@ export default function Reels() {
         const res = await fetch('/api/reels');
         if (res.ok) {
           const data = await res.json();
-          setReels(data.reels || []);
+          const reelsData = (data.reels || []).map((r: { likes?: number }) => ({
+            ...r,
+            likes: r.likes ?? Math.floor(Math.random() * 1000),
+            comments: Math.floor(Math.random() * 300)
+          }));
+          setReels(reelsData);
         }
       } catch (err) {
         console.error(err);
@@ -30,10 +37,10 @@ export default function Reels() {
   return (
     <div className="reels-container animate-fade-in">
       {/* Top right camera icon for creating a reel */}
-      <div style={{ position: 'fixed', top: '30px', right: '30px', zIndex: 1000 }} className="desktop-only">
-        <button className="btn-stellar" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="reels-create-wrapper">
+        <Button style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Camera size={20} /> CREATE REEL
-        </button>
+        </Button>
       </div>
 
       {reels.map((reel, idx) => (
@@ -48,11 +55,9 @@ export default function Reels() {
           <div className="reel-overlay">
             <div className="reel-info">
               <div className="reel-author">
-                <div className="squircle-avatar" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  {reel.author ? reel.author.charAt(0) : 'U'}
-                </div>
+                <Avatar initials={reel.author ? reel.author.charAt(0) : 'U'} size="md" isSquircle={true} />
                 <h3>{reel.author || 'Nexus Skiller'}</h3>
-                <button className="btn-follow">Follow</button>
+                <Button variant="secondary" size="sm" style={{ marginLeft: '10px' }}>Follow</Button>
               </div>
               
               <div className="reel-caption">
@@ -70,11 +75,11 @@ export default function Reels() {
             <div className="reel-actions">
               <button className="reel-action-btn">
                 <Heart size={28} className="icon-shadow" />
-                <span>{reel.likes || Math.floor(Math.random() * 1000)}</span>
+                <span>{reel.likes}</span>
               </button>
               <button className="reel-action-btn">
                 <MessageCircle size={28} className="icon-shadow" />
-                <span>{Math.floor(Math.random() * 300)}</span>
+                <span>{reel.comments}</span>
               </button>
               <button className="reel-action-btn">
                 <Send size={28} className="icon-shadow" />

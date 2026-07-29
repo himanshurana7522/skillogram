@@ -134,12 +134,36 @@
 .comms-action-icon { color: var(--text-muted); cursor: pointer; transition: 0.2s; }
 .comms-action-icon:hover { color: var(--accent-primary); }
 
+/* Back to inbox button hidden on desktop */
+.back-to-inbox-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 10px;
+}
+
 @media (max-width: 1024px) {
-  .nexus-inbox { width: 100px; }
-  .nexus-inbox-header h3, .nexus-inbox-tabs, .inbox-item-meta { display: none; }
+  .nexus-inbox { width: 300px; }
+  /* Let's keep tabs and headers visible! The user hates when functionality is removed. */
 }
 
 @media (max-width: 768px) {
   .nexus-direct-view { padding-bottom: calc(var(--dock-height) + 20px); }
-  .nexus-inbox { display: none; }
+  
+  .nexus-inbox { width: 100%; border-right: none; }
+  .nexus-comms-main { width: 100%; }
+
+  /* Master-Detail switching logic */
+  .nexus-direct-view.chat-active .nexus-inbox {
+    display: none; /* Hide inbox when chat is active */
+  }
+  
+  .nexus-direct-view:not(.chat-active) .nexus-comms-main {
+    display: none; /* Hide comms when no chat is active */
+  }
+
+  /* Show back button when inside a chat */
+  .back-to-inbox-btn { display: flex; align-items: center; justify-content: center; }
 }

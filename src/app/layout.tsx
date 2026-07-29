@@ -3,8 +3,7 @@ import { Inter } from "next/font/google";
 import { Navigation } from "@/components/Navigation";
 import { Splash } from "@/components/Splash";
 import { NotificationToast } from "@/components/NotificationToast";
-import { AppProvider } from "@/context/AppContext";
-import { AuthProvider } from "@/context/AuthContext";
+import { Providers } from "@/context/Providers";
 import { PageTransition } from "@/components/PageTransition";
 import "./globals.css";
 
@@ -26,8 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AuthProvider>
-          <AppProvider>
+        <Providers>
             <Splash />
             <Navigation />
             <NotificationToast />
@@ -36,8 +34,7 @@ export default function RootLayout({
                 {children}
               </PageTransition>
             </main>
-          </AppProvider>
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Zap, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, Zap, Share2 } from 'lucide-react';
 import { DbPost } from '@/lib/db';
+import Image from 'next/image';
 import './social.css';
 
 interface PostCardProps {
@@ -25,13 +26,13 @@ export function PostCard({ post, onCommentClick }: PostCardProps) {
              {post.location && <span className="post-location">{post.location}</span>}
            </div>
         </div>
-            <div className="skill-indicator" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Zap size={14} fill="currentColor" /> {(post as any).skillType || 'Expert'}</div>
+            <div className="skill-indicator" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Zap size={14} fill="currentColor" /> {(post as DbPost & { skillType?: string }).skillType || 'Expert'}</div>
         <button className="stellar-more-btn" style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }}><MoreHorizontal size={20} /></button>
       </header>
 
       <div className="stellar-post-media">
         {post.type === 'image' ? (
-          <img src={post.mediaUrls[0]} alt="post" />
+          <Image src={post.mediaUrls[0]} alt="post" fill style={{ objectFit: 'cover' }} unoptimized />
         ) : (
           <div className="post-media-placeholder" style={{ background: post.mediaUrls[0] || 'var(--bg-secondary)', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {post.type === 'carousel' && <div className="carousel-index">1/{post.mediaUrls.length}</div>}

@@ -11,28 +11,23 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [pingStatus, setPingStatus] = useState<string>('Testing connection...');
+
 
   React.useEffect(() => {
     async function testConnection() {
-      let raw = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const raw = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
       const cleanUrl = raw.replace(/['"]+/g, '').trim().replace(/\/$/, '').replace('https://https://', 'https://');
       
       if (!cleanUrl) {
-        setPingStatus("❌ URL Missing");
         return;
       }
       try {
-        const start = Date.now();
         const res = await fetch(`${cleanUrl}/auth/v1/health`);
-        const duration = Date.now() - start;
-        if (res.ok || res.status === 401) {
-          setPingStatus(`🟢 LATENCY: ${duration}ms (Signal Locked)`);
-        } else {
-          setPingStatus(`🟠 STATUS: ${res.status}`);
+        if (!res.ok && res.status !== 401) {
+          console.warn(`Status: ${res.status}`);
         }
-      } catch (err: any) {
-        setPingStatus(`🔴 NETWORK ERROR: ${err.message}`);
+      } catch (err: unknown) {
+        console.error(`Network error: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
     testConnection();
@@ -71,29 +66,17 @@ export default function LoginPage() {
           alert("Login successful! Redirecting...");
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[CRASH]:", err);
-      alert(`A system error occurred: ${err.message}`);
-      setError(`An unexpected error occurred: ${err.message}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`A system error occurred: ${msg}`);
+      setError(`An unexpected error occurred: ${msg}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleAuth = async () => {
-    setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
-    });
 
-    if (error) {
-      setError(error.message);
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="login-container">

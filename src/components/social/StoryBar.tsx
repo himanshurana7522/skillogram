@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Plus, Radio } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import './social.css';
 
 export function StoryBar() {
-  const [groups, setGroups] = useState<any[]>([]);
+  const [groups, setGroups] = useState<{ userId: string; username: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

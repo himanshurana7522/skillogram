@@ -1,8 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { Mic, MicOff, Video, VideoOff, Users, PhoneOff, ArrowLeft, Radio, MoreHorizontal, MessageCircle, Heart, Zap, Play } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { Mic, MicOff, Video, VideoOff, ArrowLeft, Radio, MoreHorizontal, MessageCircle, Heart, Zap } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
+import { useData } from '@/context/DataContext';
 import { DbRoom } from '@/lib/db';
+import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
 import './rooms.css';
 
 function RoomSkeleton() {
@@ -20,7 +25,8 @@ function RoomSkeleton() {
 }
 
 export default function Rooms() {
-  const { rooms, isInitializing, userProfile } = useAppContext();
+  const { isInitializing, userProfile } = useUser();
+  const { rooms } = useData();
   const [activeRoom, setActiveRoom] = useState<DbRoom | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(true);
@@ -67,7 +73,7 @@ export default function Rooms() {
            </button>
            <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => alert("Live Chat Panel opening...")}><MessageCircle size={24} /></button>
            <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => alert("Sending Heart Reaction!")}><Heart size={24} /></button>
-           <button className="btn-nebula" style={{ background: 'var(--error)', border: 'none' }} onClick={() => setActiveRoom(null)}>DISCONNECT</button>
+           <Button variant="danger" onClick={() => setActiveRoom(null)}>DISCONNECT</Button>
         </footer>
       </div>
     );
@@ -83,7 +89,7 @@ export default function Rooms() {
         <div className="pulse-indicator">
            <Radio size={18} />
            <span>{isInitializing ? 'LOADING' : rooms.length} ACTIVE ORBITS</span>
-           <button className="btn-stellar" style={{ marginLeft: '20px', padding: '10px 20px', fontSize: '11px' }} onClick={() => setShowCreateModal(true)}>START ORBIT</button>
+           <Button size="sm" onClick={() => setShowCreateModal(true)}>START ORBIT</Button>
         </div>
       </header>
 
@@ -94,7 +100,7 @@ export default function Rooms() {
           rooms.map(room => (
             <div key={room.id} className="nebula-session-card" onClick={() => setActiveRoom(room)}>
               <div className="host-nebula-box">
-                 <div className="host-avatar-squircle" style={{ background: `linear-gradient(135deg, ${room.color}, #000)` }}>{room.host.charAt(0)}</div>
+                 <Avatar initials={room.host.charAt(0)} color={`linear-gradient(135deg, ${room.color}, #000)`} size="md" isSquircle={true} />
                  <div style={{ flex: 1 }}>
                     <div className="skiller-count" style={{ display: 'inline-block' }}>{room.participantsCount} SYNCED</div>
                     <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>BY {room.host.toUpperCase()}</div>
@@ -103,7 +109,7 @@ export default function Rooms() {
               <div className="session-body">
                  <h3>{room.topic}</h3>
               </div>
-              <button className="btn-stellar" style={{ width: '100%', borderRadius: '16px' }}>SYNC FREQUENCY</button>
+              <Button fullWidth>SYNC FREQUENCY</Button>
             </div>
           ))
         )}
@@ -113,7 +119,7 @@ export default function Rooms() {
              <Zap size={48} color="var(--accent-primary)" style={{ opacity: 0.3, marginBottom: '20px' }} />
              <h2>No Active Orbits</h2>
              <p style={{ color: 'var(--text-muted)' }}>The pulse is quiet. Initialize your own workshop and lead the swap.</p>
-             <button className="btn-stellar" style={{ marginTop: '20px' }} onClick={() => setShowCreateModal(true)}>Initialize Session</button>
+             <Button onClick={() => setShowCreateModal(true)}>Initialize Session</Button>
           </div>
         )}
       </div>
@@ -126,19 +132,16 @@ export default function Rooms() {
               
               <div style={{ marginBottom: '30px' }}>
                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Workshop Topic</label>
-                 <input 
-                   type="text" 
-                   className="form-input" 
+                 <Input 
                    placeholder="e.g. Advanced UI Motion Masterclass" 
-                   style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '14px', padding: '14px', color: 'white', outline: 'none' }}
                    value={newTopic}
                    onChange={e => setNewTopic(e.target.value)}
                  />
               </div>
 
               <div style={{ display: 'flex', gap: '15px' }}>
-                 <button className="btn-nebula" style={{ flex: 1, background: 'none', border: '1px solid var(--glass-border)' }} onClick={() => setShowCreateModal(false)}>ABORT</button>
-                 <button className="btn-stellar" style={{ flex: 2 }} onClick={() => { setActiveRoom({ id: 'new', topic: newTopic, host: userProfile.username, participantsCount: 1, color: 'var(--accent-primary)' } as DbRoom); setShowCreateModal(false); }}>LAUNCH SESSION</button>
+                 <div style={{ flex: 1 }}><Button variant="ghost" fullWidth onClick={() => setShowCreateModal(false)}>ABORT</Button></div>
+                 <div style={{ flex: 2 }}><Button fullWidth onClick={() => { setActiveRoom({ id: 'new', topic: newTopic, host: userProfile.username, participantsCount: 1, color: 'var(--accent-primary)' } as DbRoom); setShowCreateModal(false); }}>LAUNCH SESSION</Button></div>
               </div>
            </div>
         </div>

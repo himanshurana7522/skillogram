@@ -1,0 +1,33 @@
+/* src/components/ui/Card.css */
+.skillogram-card {
+  border-radius: 24px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.card-default {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+}
+
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.card-highlight {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--glass-border);
+}
+
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}

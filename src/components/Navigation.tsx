@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NewRoomModal } from './NewRoomModal';
 import { PulseCreator } from './social/PulseCreator';
-import { Home, Compass, User, MessageCircle, Video, Search, Bell, X, PlusSquare, Plus, Menu, LayoutGrid, Heart, Film } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { Home, Compass, User, MessageCircle, Video, Search, X, PlusSquare, Plus, Menu, LayoutGrid, Heart, Film } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 import './Navigation.css';
 
 export function Navigation() {
@@ -13,7 +13,7 @@ export function Navigation() {
   const [isPulseCreatorOpen, setIsPulseCreatorOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { unreadCount, notifications, markNotificationsAsRead } = useAppContext();
+  const { unreadCount, notifications, markNotificationsAsRead } = useNotification();
   const pathname = usePathname();
 
   const handleBellClick = () => {
@@ -41,7 +41,7 @@ export function Navigation() {
   return (
     <>
       {/* Stellar Floating Sidebar (Desktop) */}
-      <nav className="stellar-sidebar glass-pane desktop-only">
+      <nav className="stellar-sidebar glass-pane">
         <div className="sidebar-logo-glow">
           <Link href="/">
              <h1 className="stellar-logo-text text-gradient">Skillogram<span>.</span></h1>
@@ -131,6 +131,9 @@ export function Navigation() {
            
            <Link href="/communities" className="hamburger-link" onClick={() => setShowMobileMenu(false)}>
              <LayoutGrid size={28} color="var(--accent-primary)" /> <span>Communities</span>
+           </Link>
+           <Link href="/match" className="hamburger-link" onClick={() => setShowMobileMenu(false)}>
+             <Compass size={28} color="var(--accent-primary)" /> <span>Discovery</span>
            </Link>
            <Link href="/rooms" className="hamburger-link" onClick={() => setShowMobileMenu(false)}>
              <Video size={28} color="var(--accent-secondary)" /> <span>Live Workshops</span>

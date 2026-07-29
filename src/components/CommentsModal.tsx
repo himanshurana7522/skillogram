@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import { Send } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
+
 import './FeedModals.css';
 
 interface CommentsModalProps {
@@ -10,8 +10,8 @@ interface CommentsModalProps {
   reelId: number | null;
 }
 
-export function CommentsModal({ isOpen, onClose, reelId }: CommentsModalProps) {
-  const { userProfile } = useAppContext();
+export function CommentsModal({ isOpen, onClose }: CommentsModalProps) {
+  const { userProfile } = useUser();
   const [comments, setComments] = useState<{ id: number; author: string; text: string }[]>([
     { id: 1, author: 'Sanya Design', text: 'This changed my workflow entirely! 🔥' },
     { id: 2, author: 'DevGuy99', text: 'Where can I find the source code?' },

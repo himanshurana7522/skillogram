@@ -1,16 +1,13 @@
 import { DbUser, MOCK_DB } from './db';
 
-type RankedItem = {
-  score: number;
-  item: any;
-};
 
-export function rankContent(viewer: DbUser, contentList: any[], contentType: 'post' | 'reel' | 'explore'): any[] {
+
+export function rankContent<T extends { userId?: string; authorId?: string; views?: string; likes?: unknown[]; createdAt?: string }>(viewer: DbUser, contentList: T[]): T[] {
   const ranked = contentList.map(item => {
     let score = 0;
     
     // 1. Relationship Factor (Instagram: Following weight)
-    const isFollowing = MOCK_DB.connections.includes(item.userId || item.authorId);
+    const isFollowing = MOCK_DB.connections.includes((item.userId || item.authorId) as string);
     if (isFollowing) score += 50;
 
     // 2. Skill Swap Relevance (SkillSwap specific intelligence)
@@ -31,7 +28,7 @@ export function rankContent(viewer: DbUser, contentList: any[], contentType: 'po
   return ranked.sort((a, b) => b.score - a.score).map(r => r.item);
 }
 
-export function rankExploreGrid(viewer: DbUser, exploreItems: any[]): any[] {
+export function rankExploreGrid<T extends { category?: string }>(viewer: DbUser, exploreItems: T[]): T[] {
   // Personalized explore sorting based on search history and categories
   const searchHistory = MOCK_DB.activity.searchHistory.map(s => s.toLowerCase());
   
@@ -53,7 +50,7 @@ export function rankMatchSuggestions(viewer: DbUser, userPool: DbUser[]): MatchR
     .filter(u => u.id !== viewer.id)
     .map(candidate => {
       let score = 0;
-      let reasons: string[] = [];
+      const reasons: string[] = [];
 
       // 1. Core Complementary (Critical)
       const helpsMe = candidate.teachingSkills.filter(s => viewer.learningSkills.includes(s));

@@ -1,12 +1,10 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { Session, User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
 type AuthContextType = {
-  user: User | null;
-  session: Session | null;
+  user: any | null;
+  session: any | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
 };
@@ -14,43 +12,34 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    const setData = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    };
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-      
-      if (_event === 'SIGNED_IN') {
-        router.push('/');
+    // Mock successful authentication for frontend testing
+    const mockUser = {
+      id: 'mock-user-123',
+      email: 'nexus@skillogram.io',
+      user_metadata: {
+        name: 'Nexus Admin'
       }
-      if (_event === 'SIGNED_OUT') {
-        router.push('/login');
-      }
-    });
-
-    setData();
-
-    return () => {
-      listener.subscription.unsubscribe();
     };
+    
+    setTimeout(() => {
+      setUser(mockUser);
+      setSession({ user: mockUser, access_token: 'mock-token' });
+      setIsLoading(false);
+      router.push('/');
+    }, 500);
+
   }, [router]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    router.push('/login');
   };
 
   return (

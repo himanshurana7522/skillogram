@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { ChevronRight, Shield, Archive, UserCog, Bell, Moon, LogOut, ArrowLeft } from 'lucide-react';
 import './SettingsModal.css';
 
@@ -10,7 +10,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ onClose, isOpen }: SettingsModalProps) {
-  const { theme, toggleTheme } = useAppContext();
+  const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [activeMenu, setActiveMenu] = useState<'main' | 'archive' | 'privacy' | 'account'>('main');
 

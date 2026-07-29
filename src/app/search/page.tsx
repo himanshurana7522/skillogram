@@ -1,14 +1,15 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Search as SearchIcon, X, Heart, MessageCircle, Play, Sparkles } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import Image from 'next/image';
+import { DbUser, DbRoom } from '@/lib/db';
 import './search.css';
 
 export default function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [exploreItems, setExploreItems] = useState<any[]>([]);
+  const [exploreItems, setExploreItems] = useState<{ id: string; type: string; content?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchResults, setSearchResults] = useState<{users: any[], rooms: any[]} | null>(null);
+  const [searchResults, setSearchResults] = useState<{users: DbUser[], rooms: DbRoom[]} | null>(null);
 
   useEffect(() => {
     async function fetchExplore() {
@@ -98,7 +99,7 @@ export default function Explore() {
                   className={`explore-cell ${idx % 7 === 0 ? 'wide' : idx % 10 === 0 ? 'tall' : ''}`}
                 >
                   {item.type === 'image' ? (
-                    <img src={item.content} alt="explore" />
+                    <Image src={item.content || ''} alt="explore" fill style={{ objectFit: 'cover' }} unoptimized />
                   ) : (
                     <div className="explore-placeholder" style={{ background: item.content || 'var(--bg-secondary)', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {item.type === 'reel' && <div style={{ color: 'var(--accent-primary)' }}><Play size={32} fill="currentColor" /></div>}

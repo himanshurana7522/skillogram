@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Video, Mic, Globe } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { useData } from '@/context/DataContext';
 import './NewRoomModal.css';
 
 interface NewRoomModalProps {
@@ -9,7 +9,7 @@ interface NewRoomModalProps {
 }
 
 export function NewRoomModal({ onClose, isOpen }: NewRoomModalProps) {
-  const { addRoom } = useAppContext();
+  const { addRoom } = useData();
   const [roomType, setRoomType] = useState<'video' | 'audio'>('video');
   const [topic, setTopic] = useState('');
 

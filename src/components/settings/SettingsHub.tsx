@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { 
-  ChevronLeft, ChevronRight, User, Shield, Lock, Bell, Eye, Heart, 
-  DollarSign, Activity, ShieldCheck, Moon, Key, Users, MessageSquare, 
+  ChevronLeft, ChevronRight, User, Shield, Lock, Eye, 
+  Activity, ShieldCheck, Users, MessageSquare, 
   Tag, Clock, UserX, AlertTriangle, Monitor, Info, Star, LogOut
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -128,7 +128,16 @@ export function SettingsHub({ isOpen, onClose }: SettingsHubProps) {
   );
 }
 
-function SettingsRow({ icon, title, subtitle, onClick, navArrow, titleStyle }: any) {
+interface SettingsRowProps {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  onClick: () => void;
+  navArrow?: () => React.ReactNode;
+  titleStyle?: React.CSSProperties;
+}
+
+function SettingsRow({ icon, title, subtitle, onClick, navArrow, titleStyle }: SettingsRowProps) {
   return (
     <div className="settings-item" onClick={onClick}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>

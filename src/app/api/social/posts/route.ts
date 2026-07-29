@@ -25,7 +25,7 @@ export async function GET() {
     type: post.type || 'image',
     caption: post.caption || '',
     hashtags: post.hashtags || [],
-    likes: (post as any).likes || [],
+    likes: (post as { likes?: string[] }).likes || [],
     comments: [],
     createdAt: new Date(post.created_at).toLocaleDateString()
   }));

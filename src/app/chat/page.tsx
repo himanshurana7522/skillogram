@@ -1,16 +1,21 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Image, Smile, Phone, Video, MoreVertical, Search, MessageSquare, Mic, Users, Megaphone, Info, ChevronDown, Edit, Heart, Play, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Phone, Video, MessageSquare, Mic, Info, ChevronDown, Edit, Heart, Play, Sparkles, ChevronLeft } from 'lucide-react';
 import { CallOverlay } from '@/components/CallOverlay';
 import { DbUser } from '@/lib/db';
-import { useAppContext } from '@/context/AppContext';
+import { useUser } from '@/context/UserContext';
+import { useMessaging } from '@/context/MessagingContext';
+import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
+import { Input } from '@/components/ui/Input';
 import './chat.css';
 
 export default function Chat() {
-  const { isInitializing: isAppInitializing, userProfile, sendMessage, allMessages } = useAppContext();
+  const { isInitializing: isAppInitializing, userProfile } = useUser();
+  const { sendMessage, allMessages } = useMessaging();
   const [activeTab, setActiveTab] = useState<'primary' | 'general' | 'nexus'>('primary');
   const [connections, setConnections] = useState<DbUser[]>([]);
-  const [activeContact, setActiveContact] = useState<any>(null);
+  const [activeContact, setActiveContact] = useState<DbUser | (DbUser & { userId?: string }) | null>(null);
   const [inputText, setInputText] = useState('');
   const [activeCallMode, setActiveCallMode] = useState<'audio' | 'video' | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -41,7 +46,8 @@ export default function Chat() {
 
   const handleSend = () => {
     if (!inputText.trim() || !activeContact) return;
-    const roomId = getRoomId(userProfile.id, activeContact.id || activeContact.userId);
+    const contactId = 'userId' in activeContact ? (activeContact.userId as string) : activeContact.id;
+    const roomId = getRoomId(userProfile.id, contactId);
     sendMessage(roomId, inputText);
     setInputText('');
   };
@@ -49,7 +55,7 @@ export default function Chat() {
   if (isAppInitializing) return <div className="shimmer" style={{ width: '100%', height: '100vh' }} />;
 
   return (
-    <div className="nexus-direct-view animate-fade-in">
+    <div className={`nexus-direct-view animate-fade-in ${activeContact ? 'chat-active' : ''}`}>
       {/* Sidebar - Nexus Inbox */}
       <div className="nexus-inbox">
         <div className="nexus-inbox-header">
@@ -73,7 +79,7 @@ export default function Chat() {
               className={`nexus-item ${activeContact?.id === c.id ? 'active' : ''}`} 
               onClick={() => setActiveContact(c)}
             >
-              <div className="nexus-avatar-small" style={{ background: c.color }}>{c.initials}</div>
+              <Avatar initials={c.initials} color={c.color} size="sm" isSquircle={true} />
               <div className="inbox-item-meta">
                 <div style={{ fontWeight: 800, fontSize: '15px' }}>{c.name}</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Connected in Orbit</div>
@@ -89,7 +95,10 @@ export default function Chat() {
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <header className="comms-header">
                <div className="comms-meta">
-                 <div className="comms-header-avatar" style={{ background: activeContact.color }}>{activeContact.initials}</div>
+                 <button className="back-to-inbox-btn" onClick={() => setActiveContact(null)}>
+                   <ChevronLeft size={28} color="var(--text-primary)" />
+                 </button>
+                 <Avatar initials={activeContact.initials} color={activeContact.color} size="md" isSquircle={true} />
                  <div>
                    <h4 style={{ fontWeight: 900 }}>{activeContact.name}</h4>
                    <span style={{ fontSize: '11px', color: 'var(--accent-tertiary)', fontWeight: 800 }}>STABLE FREQUENCY</span>
@@ -104,16 +113,18 @@ export default function Chat() {
 
             <div className="comms-stream" ref={scrollRef}>
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div className="nexus-avatar-small" style={{ width: '100px', height: '100px', borderRadius: '32px', margin: '0 auto 20px', fontSize: '32px' }}>{activeContact.initials}</div>
+                <div style={{ margin: '0 auto 20px', width: 'max-content' }}>
+                  <Avatar initials={activeContact.initials} color={activeContact.color} size="xl" isSquircle={true} />
+                </div>
                 <h2 style={{ fontSize: '24px', fontWeight: 900 }}>{activeContact.name}</h2>
                 <p style={{ color: 'var(--text-muted)' }}>{activeContact.username} • Skillogram Skiller</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
-                   <button className="btn-nebula" style={{ fontSize: '12px', padding: '8px 16px' }}>View Nexus</button>
-                   <button className="btn-nebula" style={{ fontSize: '12px', padding: '8px 16px', background: 'none', border: '1px solid var(--glass-border)' }}>Restrict</button>
+                   <Button size="sm" variant="primary">View Nexus</Button>
+                   <Button size="sm" variant="secondary">Restrict</Button>
                 </div>
               </div>
 
-              {allMessages[getRoomId(userProfile.id, activeContact.id || activeContact.userId)]?.map(msg => (
+              {allMessages[getRoomId(userProfile.id, 'userId' in activeContact ? (activeContact.userId as string) : activeContact.id)]?.map(msg => (
                 <div key={msg.id} className={`nebula-msg ${msg.sender === userProfile.username ? 'sent' : 'received'}`}>
                   {msg.type === 'voice' ? (
                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Play size={16} fill="white" /> <span>Nexus Audio Flux</span></div>
@@ -127,19 +138,19 @@ export default function Chat() {
             <div className="comms-input-area">
                <div className="nebula-input-wrapper">
                  <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Mic size={22} /></button>
-                 <input 
+                 <Input 
                    type="text" 
                    placeholder="Enter Nebula flux..." 
                    value={inputText}
                    onChange={(e) => setInputText(e.target.value)}
-                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                  />
                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                    {inputText ? (
                      <button style={{ color: 'var(--accent-secondary)', fontWeight: 900, background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleSend}>PULSE</button>
                    ) : (
                      <>
-                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Image size={22} /></button>
+                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><ImageIcon size={22} /></button>
                        <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Heart size={22} /></button>
                        <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Sparkles size={22} /></button>
                      </>

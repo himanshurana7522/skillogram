@@ -4,19 +4,24 @@ import { usePathname } from 'next/navigation';
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [currentPath, setCurrentPath] = useState(pathname);
   const [isAnimating, setIsAnimating] = useState(false);
   const [displayChildren, setDisplayChildren] = useState(children);
 
+  if (pathname !== currentPath) {
+    setCurrentPath(pathname);
+    setIsAnimating(true);
+  }
+
   useEffect(() => {
-    if (pathname !== undefined) {
-      setIsAnimating(true);
+    if (isAnimating) {
       const timer = setTimeout(() => {
         setDisplayChildren(children);
         setIsAnimating(false);
       }, 300); // Pulse duration
       return () => clearTimeout(timer);
     }
-  }, [pathname, children]);
+  }, [isAnimating, children]);
 
   return (
     <div className={`nebula-transition-wrapper ${isAnimating ? 'exit' : 'enter'}`}>

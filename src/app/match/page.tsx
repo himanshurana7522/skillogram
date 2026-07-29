@@ -1,8 +1,10 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { Check, X, Star, Heart, UserPlus, MessageCircle, Zap, ShieldCheck } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { Star, Zap } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 import { DbUser } from '@/lib/db';
+import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
 import './match.css';
 
 function MatchSkeleton() {
@@ -18,7 +20,7 @@ function MatchSkeleton() {
 }
 
 export default function Match() {
-  const { addMatch } = useAppContext();
+  const { userProfile, addMatch } = useUser();
   const [profiles, setProfiles] = useState<DbUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [matchFound, setMatchFound] = useState<DbUser | null>(null);
@@ -152,7 +154,7 @@ export default function Match() {
             onPointerCancel={handlePointerUp}
           >
             <div className="card-media-nebula" style={{ background: `linear-gradient(135deg, ${currentProfile.color}44, #050508)` }}>
-              <div className="nexus-avatar">{currentProfile.initials}</div>
+              <Avatar initials={currentProfile.initials} size="xl" isSquircle={true} />
               {dragOffset > 50 && <div className="swipe-badge like" style={{ borderColor: 'var(--accent-tertiary)', color: 'var(--accent-tertiary)' }}>ALIGN</div>}
               {dragOffset < -50 && <div className="swipe-badge nope" style={{ borderColor: 'var(--error)', color: 'var(--error)' }}>IGNORE</div>}
             </div>
@@ -167,7 +169,7 @@ export default function Match() {
               
               <div className="match-intelligence-badge">
                  <div className="label">NEBULA INSIGHT</div>
-                 <div className="reason">{(currentProfile as any).aiReason || 'Synergestic skill overlap detected.'}</div>
+                 <div className="reason">{(currentProfile as { aiReason?: string }).aiReason || 'Synergestic skill overlap detected.'}</div>
               </div>
 
               <div className="nexus-skill-group">
@@ -180,8 +182,8 @@ export default function Match() {
               <p style={{ fontSize: '15px', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '30px' }}>{currentProfile.bio}</p>
               
               <div className="nexus-actions">
-                <button className="btn-orbit-action btn-stellar" onClick={() => swipeCard('right')}>Align Nexus</button>
-                <button className="btn-orbit-action" style={{ background: 'var(--glass-highlight)', border: '1px solid var(--glass-border)', color: 'white' }} onClick={() => swipeCard('left')}>Pass</button>
+                <Button size="lg" className="btn-orbit-action" onClick={() => swipeCard('right')}>Align Nexus</Button>
+                <Button variant="secondary" size="lg" className="btn-orbit-action" onClick={() => swipeCard('left')}>Pass</Button>
               </div>
             </div>
           </div>
@@ -194,12 +196,12 @@ export default function Match() {
             <h2 className="text-gradient" style={{ fontSize: '40px', fontWeight: 900, marginBottom: '20px' }}>Nexus Aligned!</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>You and {matchFound.name} have formed a new skill alignment.</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '40px' }}>
-              <div className="nexus-avatar" style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'var(--accent-primary)', fontSize: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>AO</div>
-              <div className="nexus-avatar" style={{ width: '80px', height: '80px', borderRadius: '24px', background: matchFound.color, fontSize: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{matchFound.initials}</div>
+              <Avatar initials={userProfile?.initials || 'ME'} size="lg" isSquircle={true} />
+              <Avatar initials={matchFound.initials} color={matchFound.color} size="lg" isSquircle={true} />
             </div>
             <div style={{ display: 'flex', gap: '15px' }}>
-              <button className="btn-stellar" style={{ flex: 1 }} onClick={() => window.location.href = '/chat'}>Enter Orbit</button>
-              <button className="btn-nebula" style={{ flex: 1, background: 'none' }} onClick={() => setMatchFound(null)}>Continue Search</button>
+              <div style={{ flex: 1 }}><Button fullWidth onClick={() => window.location.href = '/chat'}>Enter Orbit</Button></div>
+              <div style={{ flex: 1 }}><Button variant="ghost" fullWidth onClick={() => setMatchFound(null)}>Continue Search</Button></div>
             </div>
           </div>
         </div>

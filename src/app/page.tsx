@@ -1,29 +1,19 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Share2, MoreHorizontal, Zap } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
 import { CommentsModal } from '@/components/CommentsModal';
 import { StoryBar } from '@/components/social/StoryBar';
 import { PostCard } from '@/components/social/PostCard';
-import { useAppContext } from '@/context/AppContext';
+import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { DbPost } from '@/lib/db';
 import './page.css';
 
-function PulseSkeleton() {
-  return (
-    <div className="pulse-card">
-      <div className="skeleton-media shimmer" />
-      <div className="pulse-meta">
-        <div className="line-item shimmer short" />
-        <div className="line-item shimmer long" />
-      </div>
-    </div>
-  );
-}
+
 
 export default function Home() {
-  const { reels } = useAppContext();
+  const { reels } = useData();
   const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const [activeView, setActiveView] = useState<'pulse' | 'sphere'>('sphere');

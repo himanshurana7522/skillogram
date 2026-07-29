@@ -1,0 +1,78 @@
+/* src/components/ui/BottomSheet.css */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 5000;
+}
+
+.bottom-sheet-content {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  backdrop-filter: blur(30px) saturate(180%);
+  border-top: 1px solid var(--glass-border);
+  border-radius: 32px 32px 0 0;
+  padding: 0 24px 40px;
+  z-index: 5001;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+}
+
+.bottom-sheet-handle-wrapper {
+  padding: 16px 0;
+  display: flex;
+  justify-content: center;
+  cursor: grab;
+}
+
+.bottom-sheet-handle {
+  width: 40px;
+  height: 5px;
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+
+.bottom-sheet-title {
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.bottom-sheet-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+@media (min-width: 769px) {
+  /* On desktop, make it behave like a modal instead of a full bottom sheet, or keep it bottom but smaller */
+  .bottom-sheet-content {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 500px;
+    bottom: 20px;
+    border-radius: 32px;
+    border: 1px solid var(--glass-border);
+  }
+  
+  @keyframes slideUp {
+    0% { transform: translate(-50%, 100%); opacity: 0; }
+    100% { transform: translate(-50%, 0); opacity: 1; }
+  }
+}

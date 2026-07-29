@@ -135,6 +135,13 @@
   justify-content: center;
   gap: 60px;
   margin-bottom: 50px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.skillogram-tabs::-webkit-scrollbar {
+  display: none;
 }
 .skillogram-tabs button {
   background: none; border: none;
@@ -222,7 +229,7 @@
   .profile-top-bar { flex-direction: column; gap: 20px; }
   .profile-stats { justify-content: center; }
   .skillogram-tabs { gap: 30px; }
-  .skillogram-tabs button span { display: none; }
+  /* Removed display:none on tab text to preserve functionality */
 }
 
 @media (max-width: 768px) {

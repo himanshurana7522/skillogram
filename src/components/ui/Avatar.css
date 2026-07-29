@@ -1,0 +1,18 @@
+/* src/components/ui/Avatar.css */
+.skillogram-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.avatar-sm { width: 32px; height: 32px; font-size: 14px; }
+.avatar-md { width: 44px; height: 44px; font-size: 18px; }
+.avatar-lg { width: 64px; height: 64px; font-size: 24px; }
+.avatar-xl { width: 120px; height: 120px; font-size: 48px; }
+
+.avatar-circle { border-radius: 50%; }
+.avatar-squircle { border-radius: 25%; } /* Skillogram squircle style */

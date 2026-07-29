@@ -1,7 +1,9 @@
 'use client';
 import React, { useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import './EditProfileModal.css';
+import { useUser } from '@/context/UserContext';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 interface EditProfileModalProps {
   onClose: () => void;
@@ -9,15 +11,13 @@ interface EditProfileModalProps {
 }
 
 export function EditProfileModal({ onClose, isOpen }: EditProfileModalProps) {
-  const { userProfile, updateUserProfile } = useAppContext();
+  const { userProfile, updateUserProfile } = useUser();
   
   const [name, setName] = useState(userProfile.name);
   const [username, setUsername] = useState(userProfile.username);
   const [bio, setBio] = useState(userProfile.bio);
   const [teaching, setTeaching] = useState(userProfile.teachingSkills.join(', '));
   const [learning, setLearning] = useState(userProfile.learningSkills.join(', '));
-
-  if (!isOpen) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,46 +32,36 @@ export function EditProfileModal({ onClose, isOpen }: EditProfileModalProps) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content glass-pane animate-fade-in" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="text-gradient">Edit Nexus</h2>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+    <BottomSheet isOpen={isOpen} onClose={onClose} title="Edit Nexus">
+      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ flex: 1 }}>
+            <Input label="Name" value={name} onChange={e => setName(e.target.value)} required />
+          </div>
+          <div style={{ flex: 1 }}>
+            <Input label="Username" value={username} onChange={e => setUsername(e.target.value)} required />
+          </div>
         </div>
 
-        <form className="edit-profile-form" onSubmit={handleSave}>
-          <div className="edit-split">
-            <div className="form-group">
-              <label>Name</label>
-              <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} required />
-            </div>
-            <div className="form-group">
-              <label>Username</label>
-              <input type="text" className="form-input" value={username} onChange={e => setUsername(e.target.value)} required />
-            </div>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Bio</label>
+          <textarea 
+            value={bio} 
+            onChange={e => setBio(e.target.value)} 
+            required 
+            placeholder="Your Skillogram mission..."
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '14px 20px', color: 'white', minHeight: '100px', outline: 'none' }}
+          />
+        </div>
 
-          <div className="form-group">
-            <label>Bio</label>
-            <textarea value={bio} onChange={e => setBio(e.target.value)} required placeholder="Your Skillogram mission..."/>
-          </div>
+        <Input label="Expertise (comma separated)" value={teaching} onChange={e => setTeaching(e.target.value)} />
+        <Input label="Quest (comma separated)" value={learning} onChange={e => setLearning(e.target.value)} />
 
-          <div className="form-group">
-            <label>Expertise (comma separated)</label>
-            <input type="text" className="form-input" value={teaching} onChange={e => setTeaching(e.target.value)} />
-          </div>
-
-          <div className="form-group">
-            <label>Quest (comma separated)</label>
-            <input type="text" className="form-input" value={learning} onChange={e => setLearning(e.target.value)} />
-          </div>
-
-          <div className="modal-actions" style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
-            <button type="button" className="btn-secondary" onClick={onClose} style={{ flex: 1 }}>Abort</button>
-            <button type="submit" className="btn-nebula" style={{ flex: 2 }}>Save to Nexus</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+          <div style={{ flex: 1 }}><Button type="button" variant="secondary" fullWidth onClick={onClose}>Abort</Button></div>
+          <div style={{ flex: 2 }}><Button type="submit" variant="primary" fullWidth>Save to Nexus</Button></div>
+        </div>
+      </form>
+    </BottomSheet>
   );
 }

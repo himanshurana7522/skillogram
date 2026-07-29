@@ -1,11 +1,14 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { MapPin, Link2, Grid, Video, Bookmark, Tag, Star, ChevronRight, UserPlus, MoreHorizontal, Settings2, LayoutGrid, Award, Zap } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
+import { Link2, Grid, Video, Bookmark, ChevronRight, Settings2, LayoutGrid, Award, Zap } from 'lucide-react';
+import Image from 'next/image';
+import { useUser } from '@/context/UserContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { SettingsHub } from '@/components/settings/SettingsHub';
+import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
 import './profile.css';
 
 function ProfileSkeleton() {
@@ -21,14 +24,14 @@ function ProfileSkeleton() {
 }
 
 export default function Profile() {
-  const { userProfile, isInitializing } = useAppContext();
+  const { userProfile, isInitializing } = useUser();
   const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('posts');
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
-  const [insights, setInsights] = useState<any>(null);
+  const [insights, setInsights] = useState<{ accountsReached?: number | string; accountsEngaged?: number | string; } | null>(null);
 
   useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -60,10 +63,8 @@ export default function Profile() {
       {/* Nebula Header */}
       <header className="skillogram-profile-header">
          <div className="profile-avatar-section">
-           <div className="skillogram-avatar-large">
-             <div className="avatar-inner-box" style={{ background: userProfile.color }}>
-                {userProfile.initials || userProfile.name.charAt(0)}
-             </div>
+           <div style={{ position: 'relative' }}>
+             <Avatar initials={userProfile.initials || userProfile.name.charAt(0)} color={userProfile.color} size="xl" isSquircle={true} />
              {(userProfile.accountType === 'creator' || userProfile.accountType === 'business') && (
                <div className="skillogram-verified-badge">
                  <Award size={20} color="white" />
@@ -76,8 +77,8 @@ export default function Profile() {
            <div className="profile-top-bar">
              <h2 className="profile-username">{userProfile.username}</h2>
              <div className="profile-actions">
-               <button className="btn-nebula" onClick={() => setShowEditProfile(true)}>Edit Nebula</button>
-               <button className="btn-nebula" onClick={() => setShowSettings(true)}><Settings2 size={20} /></button>
+               <Button onClick={() => setShowEditProfile(true)}>Edit Nebula</Button>
+               <Button variant="secondary" onClick={() => setShowSettings(true)}><Settings2 size={20} /></Button>
              </div>
            </div>
 
@@ -145,7 +146,7 @@ export default function Profile() {
            <div className="skillogram-mosaic-grid animate-fade-in">
               {[1,2,3,4,5,6,7,8,9].map(i => (
                 <div key={i} className={`mosaic-item ${i % 4 === 0 ? 'wide' : i % 7 === 0 ? 'tall' : ''}`}>
-                   <img src={`https://picsum.photos/seed/${i + 120}/600/600`} alt="post" />
+                   <Image src={`https://picsum.photos/seed/${i + 120}/600/600`} alt="post" fill style={{ objectFit: 'cover' }} unoptimized />
                    <div style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', padding: '5px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: 800 }}>
                      {i % 3 === 0 ? 'PULSE' : 'SPHERE'}
                    </div>

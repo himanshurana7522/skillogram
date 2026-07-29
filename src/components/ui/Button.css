@@ -1,0 +1,74 @@
+/* src/components/ui/Button.css */
+.skillogram-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.skillogram-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variants */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+}
+.btn-primary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+}
+
+.btn-secondary {
+  background: var(--glass-highlight);
+  border-color: var(--glass-border);
+  color: white;
+}
+.btn-secondary:not(:disabled):hover {
+  background: var(--accent-primary);
+  border-color: transparent;
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn-ghost:not(:disabled):hover {
+  background: var(--glass-highlight);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--error);
+  color: white;
+}
+.btn-danger:not(:disabled):hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Sizes */
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+.btn-md {
+  padding: 12px 24px;
+  font-size: 14px;
+}
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+/* Modifiers */
+.btn-full {
+  width: 100%;
+}

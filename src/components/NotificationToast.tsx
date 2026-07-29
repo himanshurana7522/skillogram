@@ -1,28 +1,27 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import { Bell, MessageSquare, Flame, X } from 'lucide-react';
+import { useNotification, AppNotification } from '@/context/NotificationContext';
+import { MessageSquare, Flame, X } from 'lucide-react';
 
 export function NotificationToast() {
-  const { notifications } = useAppContext();
-  const [currentNotif, setCurrentNotif] = useState<any>(null);
+  const { notifications } = useNotification();
+  const [currentNotif, setCurrentNotif] = useState<AppNotification | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  if (notifications.length > 0 && currentNotif !== notifications[0]) {
+    setCurrentNotif(notifications[0]);
+    setIsVisible(true);
+  }
+
   useEffect(() => {
-    if (notifications.length > 0) {
-      const latest = notifications[0];
-      // Only show toast for very recent notifications (within last few seconds)
-      // For this demo, we'll show it if it's the newest one added during the session
-      setCurrentNotif(latest);
-      setIsVisible(true);
-      
+    if (isVisible) {
       const timer = setTimeout(() => {
         setIsVisible(false);
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [notifications]);
+  }, [isVisible, currentNotif]);
 
   if (!currentNotif || !isVisible) return null;
 

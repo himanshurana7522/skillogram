@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Zap, Timer, Music, Scissors, Type, Smile, MoreHorizontal, Video, Image, ChevronLeft } from 'lucide-react';
+import { X, Zap, Timer, Music, Scissors, Type, Smile, MoreHorizontal, Video, Image as ImageIcon } from 'lucide-react';
 import './media.css';
 
 interface CameraEditorProps {
@@ -39,7 +39,7 @@ export function CameraEditor({ isOpen, onClose }: CameraEditorProps) {
         </div>
 
         <div className="preview-indicator">
-          {activeMode === 'reels' ? <Video size={48} opacity={0.3} /> : <Image size={48} opacity={0.3} />}
+          {activeMode === 'reels' ? <Video size={48} opacity={0.3} /> : <ImageIcon size={48} opacity={0.3} />}
           <p className="mt-4 opacity-50">Camera Simulator Active</p>
         </div>
       </main>

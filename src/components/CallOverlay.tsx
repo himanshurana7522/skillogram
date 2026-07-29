@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Volume2 } from 'lucide-react';
-import { useAppContext } from '@/context/AppContext';
 import './CallOverlay.css';
 
 interface CallOverlayProps {
@@ -11,7 +10,6 @@ interface CallOverlayProps {
 }
 
 export function CallOverlay({ isOpen, onClose, contactName, isVideoCall }: CallOverlayProps) {
-  const { userProfile } = useAppContext();
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isVidOff, setIsVidOff] = useState(!isVideoCall);
@@ -20,23 +18,6 @@ export function CallOverlay({ isOpen, onClose, contactName, isVideoCall }: CallO
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const pc = useRef<RTCPeerConnection | null>(null);
   const localStream = useRef<MediaStream | null>(null);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isOpen) {
-      timer = setInterval(() => {
-        setCallDuration(prev => prev + 1);
-      }, 1000);
-      startCall();
-    } else {
-      setCallDuration(0);
-      endCall();
-    }
-    return () => {
-      clearInterval(timer);
-      endCall();
-    };
-  }, [isOpen]);
 
   const startCall = async () => {
     // Signaling (Sync) will be migrated to Supabase Realtime in future phase
@@ -48,6 +29,25 @@ export function CallOverlay({ isOpen, onClose, contactName, isVideoCall }: CallO
     pc.current?.close();
     pc.current = null;
   };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isOpen) {
+      timer = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+      startCall();
+    } else {
+      setTimeout(() => setCallDuration(0), 0);
+      endCall();
+    }
+    return () => {
+      clearInterval(timer);
+      endCall();
+    };
+  }, [isOpen]);
+
+
 
   if (!isOpen) return null;
 

@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { Users, Presentation, Shield, Code, Brush, LayoutGrid, ArrowRight } from 'lucide-react';
 import './communities.css';
-import { useAppContext } from '@/context/AppContext';
+import { useUser } from '@/context/UserContext';
+import { Button } from '@/components/ui/Button';
 
 const MOCK_COMMUNITIES = [
   { id: 1, name: 'Frontend Alchemists', description: 'Advanced UI/UX, React, and motion design discussions for senior engineers.', members: 12500, active: 432, color: 'var(--accent-secondary)', icon: <LayoutGrid size={32} color="white" /> },
@@ -12,7 +13,7 @@ const MOCK_COMMUNITIES = [
 ];
 
 export default function Communities() {
-  const { isInitializing } = useAppContext();
+  const { isInitializing } = useUser();
 
   if (isInitializing) {
     return <div className="communities-wrapper shimmer" style={{ height: '100vh', borderRadius: '20px' }} />;
@@ -24,8 +25,8 @@ export default function Communities() {
         <h1>Professional Communities</h1>
         <p>Join highly specialized skill groups to level up your craft and expand your orbital network.</p>
         <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
-          <button className="btn-stellar" onClick={() => alert("Loading discovery algorithm...")}>Discover Groups</button>
-          <button className="btn-secondary" onClick={() => alert("Loading your saved networks...")}>Your Networks</button>
+          <Button onClick={() => alert("Loading discovery algorithm...")}>Discover Groups</Button>
+          <Button variant="secondary" onClick={() => alert("Loading your saved networks...")}>Your Networks</Button>
         </div>
       </header>
 

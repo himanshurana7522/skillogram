@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Zap, Type, Music, Settings, Camera, Image as ImageIcon, Circle, RefreshCw, Sparkles, Wand2, Loader2 } from 'lucide-react';
+import { X, Zap, Type, Music, Settings, Camera, Image as ImageIcon, RefreshCw, Sparkles, Wand2, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
@@ -28,6 +29,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
       stopCamera();
     }
     return () => stopCamera();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const startCamera = async () => {
@@ -78,7 +80,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
 
       // 2. Upload to Supabase Storage
       const fileName = `${user.id}/${Date.now()}.jpg`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('media')
         .upload(fileName, blob);
 
@@ -100,9 +102,9 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
 
       onClose();
       window.location.href = '/'; 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Upload error details:", err);
-      const msg = err.message || "Unknown error";
+      const msg = err instanceof Error ? err.message : "Unknown error";
       alert(`FAILED TO SYNC: ${msg}\n\n(Tip: Ensure bucket 'media' exists and has Public Upload policies)`);
     } finally {
       setIsUploading(false);
@@ -127,7 +129,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
         {/* Real Camera Feed or Captured Image */}
         <div className="camera-feed" style={{ background: filters[activeFilter].color }}>
           {capturedImage ? (
-            <img src={capturedImage} alt="captured" className="video-preview" />
+            <Image src={capturedImage} alt="captured" className="video-preview" fill unoptimized />
           ) : (
             <video 
               ref={videoRef} 

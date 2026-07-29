@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Hash, Globe, Link2, Mail, MessageSquare } from 'lucide-react';
+import { Hash, Globe, Mail, MessageSquare } from 'lucide-react';
 import './FeedModals.css';
 
 interface ShareModalProps {
