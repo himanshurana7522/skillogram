@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Skillogram</string>
+    <string name="title_activity_main">Skillogram</string>
+    <string name="package_name">com.skillogram.app</string>
+    <string name="custom_url_scheme">com.skillogram.app</string>
+</resources>
