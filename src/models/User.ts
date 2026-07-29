@@ -15,6 +15,9 @@ const UserSchema = new mongoose.Schema({
   accountType: { type: String, enum: ['personal', 'creator', 'business'], default: 'personal' },
   isPrivate: { type: Boolean, default: false },
   avatarUrl: { type: String },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
