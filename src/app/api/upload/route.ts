@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { getServerSession } from 'next-auth';
-import { handler as authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // Cloudinary auto-configures using CLOUDINARY_URL in the environment
 // No need to explicitly call cloudinary.config() if CLOUDINARY_URL is present.
