@@ -1,12 +1,12 @@
-import { MOCK_DB } from '@/lib/db';
+import dbConnect from '@/lib/mongoose';
+import User from '@/models/User';
 
 export async function GET() {
-  const connectedIds = MOCK_DB.connections;
+  await dbConnect();
   
-  // Map connected IDs to full user objects from the pool
-  const connections = connectedIds.map(id => {
-    return MOCK_DB.userPool.find(u => u.id === id);
-  }).filter(Boolean);
-
+  // For the sake of the MVP, we just return all users except the current one (if we had the session). 
+  // Let's just return 10 random users to simulate connections.
+  const connections = await User.find({}).limit(10);
+  
   return Response.json({ connections });
 }

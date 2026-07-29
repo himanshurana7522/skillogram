@@ -1,6 +1,6 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { SessionProvider, useSession, signOut as nextAuthSignOut } from 'next-auth/react';
 
 type AuthContextType = {
   user: any | null;
@@ -11,41 +11,30 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any | null>(null);
-  const [session, setSession] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    // Mock successful authentication for frontend testing
-    const mockUser = {
-      id: 'mock-user-123',
-      email: 'nexus@skillogram.io',
-      user_metadata: {
-        name: 'Nexus Admin'
-      }
-    };
-    
-    setTimeout(() => {
-      setUser(mockUser);
-      setSession({ user: mockUser, access_token: 'mock-token' });
-      setIsLoading(false);
-      router.push('/');
-    }, 500);
-
-  }, [router]);
+function AuthProviderInner({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
+  
+  const isLoading = status === 'loading';
+  const user = session?.user ?? null;
 
   const signOut = async () => {
-    setUser(null);
-    setSession(null);
-    router.push('/login');
+    await nextAuthSignOut({ callbackUrl: '/login' });
   };
 
   return (
     <AuthContext.Provider value={{ user, session, isLoading, signOut }}>
       {children}
     </AuthContext.Provider>
+  );
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthProviderInner>
+        {children}
+      </AuthProviderInner>
+    </SessionProvider>
   );
 }
 

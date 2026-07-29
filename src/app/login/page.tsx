@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import './login.css';
 
 export default function LoginPage() {
@@ -10,28 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-
-
-  React.useEffect(() => {
-    async function testConnection() {
-      const raw = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-      const cleanUrl = raw.replace(/['"]+/g, '').trim().replace(/\/$/, '').replace('https://https://', 'https://');
-      
-      if (!cleanUrl) {
-        return;
-      }
-      try {
-        const res = await fetch(`${cleanUrl}/auth/v1/health`);
-        if (!res.ok && res.status !== 401) {
-          console.warn(`Status: ${res.status}`);
-        }
-      } catch (err: unknown) {
-        console.error(`Network error: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }
-    testConnection();
-  }, []);
+  const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,31 +20,24 @@ export default function LoginPage() {
     setSuccess(null);
 
     try {
-      console.log(`[AUTH] Attempting ${isLogin ? 'Login' : 'Signup'} for:`, email);
-      const { data, error } = isLogin 
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+      const res = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+        action: isLogin ? 'login' : 'signup'
+      });
 
-      if (error) {
-        console.error("[AUTH ERROR]:", error);
-        // Provide more context in the alert
-        alert(`Auth Failed: ${error.message} (${error.status || 'unknown status'})`);
-        setError(error.message);
+      if (res?.error) {
+        setError(res.error);
+        alert(`Auth Failed: ${res.error}`);
       } else {
-        console.log("[AUTH SUCCESS]:", data);
         if (!isLogin) {
-          const isEmailConfirmed = data.user?.email_confirmed_at;
-          if (isEmailConfirmed) {
-            alert("Success! Account created. You are now logged in.");
-            setSuccess("Account created! You can now sign in.");
-          } else {
-            alert("Success! Account created. If login fails, check your email or verify if confirmation is required.");
-            setSuccess("Account created! Check your email if required.");
-          }
-          setIsLogin(true);
+          setSuccess("Account created! You are now logged in.");
+          alert("Success! Account created. You are now logged in.");
         } else {
           alert("Login successful! Redirecting...");
         }
+        router.push('/');
       }
     } catch (err: unknown) {
       console.error("[CRASH]:", err);
@@ -76,8 +49,6 @@ export default function LoginPage() {
     }
   };
 
-
-
   return (
     <div className="login-container">
       <div className="nebula-blob" style={{ top: '-10%', right: '-10%' }} />
@@ -87,7 +58,6 @@ export default function LoginPage() {
         <h1 className="login-logo text-gradient">Skillogram<span>.</span></h1>
         <p>{isLogin ? 'Welcome back to the Nebula.' : 'Join the orbital skill network.'}</p>
         
-
         {error && <div className="error-msg">{error}</div>}
         {success && <div className="success-msg" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(16, 185, 129, 0.2)' }}>{success}</div>}
         
@@ -114,7 +84,6 @@ export default function LoginPage() {
             {isLoading ? 'SYNCING...' : (isLogin ? 'SIGN IN' : 'CREATE ACCOUNT')}
           </button>
         </form>
-        
 
         <div className="auth-switch">
           {isLogin ? "Don't have an account?" : "Already a member?"}
