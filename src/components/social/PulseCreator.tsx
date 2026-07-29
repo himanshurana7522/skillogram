@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { X, Zap, Type, Music, Settings, Camera, Image as ImageIcon, RefreshCw, Sparkles, Wand2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
 interface PulseCreatorProps {
@@ -74,38 +73,40 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
     setIsUploading(true);
 
     try {
-      // 1. Convert DataURL to Blob
-      const response = await fetch(capturedImage);
-      const blob = await response.blob();
+      // 1. Upload Base64 Data URL to our new Cloudinary backend route
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: capturedImage })
+      });
 
-      // 2. Upload to Supabase Storage
-      const fileName = `${user.id}/${Date.now()}.jpg`;
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(fileName, blob);
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json();
+        throw new Error(errData.error || 'Failed to upload to Cloudinary');
+      }
 
-      if (uploadError) throw uploadError;
+      const { url: publicUrl } = await uploadRes.json();
 
-      // 3. Get Public URL
-      const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(fileName);
+      // 2. Save the Post to our backend API (since we migrated off Supabase)
+      // Note: We need a social/posts API route. For now, we'll hit our mock route or the new posts API.
+      const dbRes = await fetch('/api/social/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          media_urls: [publicUrl],
+          type: 'image',
+          caption: caption || `Pulse from Nebula - ${new Date().toLocaleDateString()}`
+        })
+      });
 
-      // 4. Save to Database
-      const { error: dbError } = await supabase.from('posts').insert([{
-        user_id: user.id,
-        media_urls: [publicUrl],
-        type: 'image',
-        caption: caption || `Pulse from Nebula - ${new Date().toLocaleDateString()}`,
-        hashtags: ['nebula', 'pulse']
-      }]);
-
-      if (dbError) throw dbError;
+      if (!dbRes.ok) throw new Error("Failed to save post to database");
 
       onClose();
       window.location.href = '/'; 
     } catch (err: unknown) {
       console.error("Upload error details:", err);
       const msg = err instanceof Error ? err.message : "Unknown error";
-      alert(`FAILED TO SYNC: ${msg}\n\n(Tip: Ensure bucket 'media' exists and has Public Upload policies)`);
+      alert(`FAILED TO SYNC: ${msg}`);
     } finally {
       setIsUploading(false);
     }
