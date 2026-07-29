@@ -1,11 +1,16 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongoose";
 import User from "@/models/User";
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -51,9 +56,31 @@ export const authOptions = {
     })
   ],
   session: {
-    strategy: "jwt"
+    strategy: "jwt" as const
   },
   callbacks: {
+    async signIn({ user, account, profile }: any) {
+      if (account?.provider === 'google') {
+        await dbConnect();
+        const existingUser = await User.findOne({ email: user.email });
+        if (!existingUser) {
+          const username = user.email.split('@')[0] + Math.floor(Math.random() * 1000);
+          const newUser = await User.create({
+            email: user.email,
+            name: user.name,
+            username: username,
+            initials: user.name?.[0]?.toUpperCase() || 'U',
+            avatarUrl: user.image
+          });
+          user.id = newUser._id.toString();
+          user.image = newUser.username; // Map image field to username for JWT token
+        } else {
+          user.id = existingUser._id.toString();
+          user.image = existingUser.username; // Map image field to username for JWT token
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
