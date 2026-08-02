@@ -6,10 +6,11 @@ import dbConnect from "@/lib/mongoose";
 import User from "@/models/User";
 
 export const authOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -61,38 +62,46 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }: any) {
       if (account?.provider === 'google') {
-        await dbConnect();
-        const existingUser = await User.findOne({ email: user.email });
-        if (!existingUser) {
-          const username = user.email.split('@')[0] + Math.floor(Math.random() * 1000);
-          const newUser = await User.create({
-            email: user.email,
-            name: user.name,
-            username: username,
-            initials: user.name?.[0]?.toUpperCase() || 'U',
-            avatarUrl: user.image
-          });
-          user.id = newUser._id.toString();
-          user.image = newUser.username; // Map image field to username for JWT token
-        } else {
-          user.id = existingUser._id.toString();
-          user.image = existingUser.username; // Map image field to username for JWT token
+        if (!user.email) return false;
+        try {
+          await dbConnect();
+          const existingUser = await User.findOne({ email: user.email });
+          if (!existingUser) {
+            const username = user.email.split('@')[0] + Math.floor(Math.random() * 10000);
+            await User.create({
+              email: user.email,
+              name: user.name || user.email.split('@')[0],
+              username: username,
+              initials: user.name?.[0]?.toUpperCase() || user.email.charAt(0).toUpperCase(),
+              avatarUrl: user.image
+            });
+          }
+          return true;
+        } catch (error) {
+          console.error("Error during Google sign-in user creation:", error);
+          return false;
         }
       }
       return true;
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, account }: any) {
+      // 'user' is only present on initial sign-in
       if (user) {
-        token.id = user.id;
-        token.username = user.image;
+        await dbConnect();
+        const dbUser = await User.findOne({ email: user.email });
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.username = dbUser.username;
+        } else {
+          token.id = user.id;
+          token.username = user.image; // fallback
+        }
       }
       return token;
     },
     async session({ session, token }: any) {
       if (token && session.user) {
         (session.user as any).id = token.id as string;
-        session.user.name = token.name as string;
-        session.user.email = token.email as string;
         session.user.image = token.username as string; // Storing username in image field
       }
       return session;
