@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, ReactNode, useCallback } fr
 
 export type AppNotification = {
   id: string;
-  type: 'match' | 'message' | 'system';
+  type: 'match' | 'message' | 'system' | 'error' | 'success';
   title: string;
   message: string;
   time: string;

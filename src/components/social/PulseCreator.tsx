@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { X, Zap, Type, Music, Settings, Camera, Image as ImageIcon, RefreshCw, Sparkles, Wand2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { useNotification } from '@/context/NotificationContext';
 
 interface PulseCreatorProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
   const { user } = useAuth();
+  const { addNotification } = useNotification();
 
   React.useEffect(() => {
     if (isOpen) {
@@ -106,7 +108,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
     } catch (err: unknown) {
       console.error("Upload error details:", err);
       const msg = err instanceof Error ? err.message : "Unknown error";
-      alert(`FAILED TO SYNC: ${msg}`);
+      addNotification({ type: 'error', title: 'Upload Failed', message: msg });
     } finally {
       setIsUploading(false);
     }
@@ -170,13 +172,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
           )}
         </header>
 
-        {/* Left Toolbar (Like Instagram/Tiktok) */}
-        <div className="camera-side-toolbar">
-          <button className="cam-tool-btn" onClick={() => alert("Text Editor Opening...")}><Type size={22} /><span>Text</span></button>
-          <button className="cam-tool-btn" onClick={() => alert("Audio Library Opening...")}><Music size={22} /><span>Audio</span></button>
-          <button className="cam-tool-btn" onClick={() => alert("Fetching Creator Effects...")}><Wand2 size={22} /><span>Effects</span></button>
-          <button className="cam-tool-btn" onClick={() => alert("Retouch smoothing activated.")}><Sparkles size={22} /><span>Retouch</span></button>
-        </div>
+        {/* Left Toolbar Removed for Web Version */}
 
         {/* Bottom Controls */}
         <footer className="camera-bottom-panel">
@@ -195,7 +191,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
               </div>
 
               <div className="camera-actions">
-                 <button className="gallery-btn" onClick={() => alert("Navigating to Camera Roll...")}>
+                 <button className="gallery-btn" onClick={() => addNotification({ type: 'system', title: 'Gallery', message: 'Camera Roll access not supported in this mode.' })}>
                     <ImageIcon size={24} />
                  </button>
 
@@ -215,7 +211,7 @@ export function PulseCreator({ isOpen, onClose }: PulseCreatorProps) {
                     </div>
                  </div>
 
-                 <button className="flip-btn" onClick={() => alert("Flipping to front/rear camera...")}>
+                 <button className="flip-btn" onClick={() => addNotification({ type: 'system', title: 'Flip Camera', message: 'Front/Rear toggle active.' })}>
                     <RefreshCw size={24} />
                  </button>
               </div>

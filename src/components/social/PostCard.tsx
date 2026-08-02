@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Heart, MessageCircle, Bookmark, MoreHorizontal, Zap, Share2 } from 'lucide-react';
 import { DbPost } from '@/lib/db';
 import Image from 'next/image';
+import { useNotification } from '@/context/NotificationContext';
 import './social.css';
 
 interface PostCardProps {
@@ -13,6 +14,57 @@ interface PostCardProps {
 export function PostCard({ post, onCommentClick }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { addNotification } = useNotification();
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by ${post.authorName}`,
+          text: post.caption,
+          url: `${window.location.origin}/post/${post.id}`
+        });
+      } catch (err) {
+        console.error('Error sharing', err);
+      }
+    } else {
+      // Fallback
+      navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+      addNotification({ type: 'success', title: 'Link Copied', message: 'Post link copied to clipboard.' });
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    // Optimistic UI
+    setIsSaved(!isSaved);
+    try {
+      const res = await fetch('/api/bookmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post.id })
+      });
+      if (!res.ok) {
+        throw new Error('Failed to save bookmark');
+      }
+      const data = await res.json();
+      setIsSaved(data.bookmarked);
+      addNotification({ 
+        type: data.bookmarked ? 'success' : 'system', 
+        title: data.bookmarked ? 'Saved' : 'Unsaved', 
+        message: data.bookmarked ? 'Post added to bookmarks.' : 'Post removed from bookmarks.' 
+      });
+    } catch (e) {
+      console.error(e);
+      // Revert optimistic update
+      setIsSaved(isSaved);
+      addNotification({ type: 'error', title: 'Error', message: 'Failed to save bookmark.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <article className="stellar-post animate-fade-in">
@@ -54,12 +106,13 @@ export function PostCard({ post, onCommentClick }: PostCardProps) {
             <Heart size={20} fill={isLiked ? 'white' : 'none'} color={isLiked ? 'white' : 'white'} className={isLiked ? 'animate-pop' : ''} />
           </button>
           <button onClick={() => onCommentClick(post.id)} className="action-btn"><MessageCircle size={20} /></button>
-          <button className="action-btn"><Share2 size={20} /></button>
+          <button onClick={handleShare} className="action-btn"><Share2 size={20} /></button>
         </div>
         <button 
-          onClick={() => setIsSaved(!isSaved)} 
+          onClick={handleBookmark} 
+          disabled={isSaving}
           className={`action-btn ${isSaved ? 'saved' : ''}`}
-          style={{ background: isSaved ? 'var(--accent-secondary)' : 'var(--glass-highlight)' }}
+          style={{ background: isSaved ? 'var(--accent-secondary)' : 'var(--glass-highlight)', opacity: isSaving ? 0.7 : 1 }}
         >
           <Bookmark size={20} fill={isSaved ? 'white' : 'none'} />
         </button>

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongoose';
@@ -7,14 +7,14 @@ import Chat from '@/models/Chat';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions as any);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const contactId = searchParams.get('contactId');
 
     if (!contactId) {
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions as any);
     if (!session?.user?.id) {

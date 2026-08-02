@@ -8,11 +8,13 @@ import { useMessaging } from '@/context/MessagingContext';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
+import { useNotification } from '@/context/NotificationContext';
 import './chat.css';
 
 export default function Chat() {
   const { isInitializing: isAppInitializing, userProfile } = useUser();
   const { sendMessage, allMessages } = useMessaging();
+  const { addNotification } = useNotification();
   const [activeTab, setActiveTab] = useState<'primary' | 'general' | 'nexus'>('primary');
   const [connections, setConnections] = useState<DbUser[]>([]);
   const [activeContact, setActiveContact] = useState<DbUser | (DbUser & { userId?: string }) | null>(null);
@@ -50,6 +52,10 @@ export default function Chat() {
     const roomId = getRoomId(userProfile.id, contactId);
     sendMessage(roomId, inputText);
     setInputText('');
+  };
+
+  const handleActionNotImplemented = (feature: string) => {
+    addNotification({ type: 'system', title: 'Feature Disabled', message: `${feature} is not available in this build.` });
   };
 
   if (isAppInitializing) return <div className="shimmer" style={{ width: '100%', height: '100vh' }} />;
@@ -105,9 +111,9 @@ export default function Chat() {
                  </div>
                </div>
                <div style={{ display: 'flex', gap: '20px' }}>
-                 <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => setActiveCallMode('audio')}><Phone size={22} /></button>
-                 <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => setActiveCallMode('video')}><Video size={22} /></button>
-                 <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Info size={22} /></button>
+                 <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => handleActionNotImplemented('Voice Call')}><Phone size={22} /></button>
+                 <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => handleActionNotImplemented('Video Call')}><Video size={22} /></button>
+                 <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => handleActionNotImplemented('User Info')}><Info size={22} /></button>
                </div>
             </header>
 
@@ -119,8 +125,8 @@ export default function Chat() {
                 <h2 style={{ fontSize: '24px', fontWeight: 900 }}>{activeContact.name}</h2>
                 <p style={{ color: 'var(--text-muted)' }}>{activeContact.username} • Skillogram Skiller</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
-                   <Button size="sm" variant="primary">View Nexus</Button>
-                   <Button size="sm" variant="secondary">Restrict</Button>
+                   <Button size="sm" variant="primary" onClick={() => handleActionNotImplemented('View Nexus')}>View Nexus</Button>
+                   <Button size="sm" variant="secondary" onClick={() => handleActionNotImplemented('Restrict User')}>Restrict</Button>
                 </div>
               </div>
 
@@ -150,9 +156,9 @@ export default function Chat() {
                      <button style={{ color: 'var(--accent-secondary)', fontWeight: 900, background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleSend}>PULSE</button>
                    ) : (
                      <>
-                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><ImageIcon size={22} /></button>
-                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Heart size={22} /></button>
-                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }}><Sparkles size={22} /></button>
+                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => handleActionNotImplemented('Image Upload')}><ImageIcon size={22} /></button>
+                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => handleActionNotImplemented('Heart React')}><Heart size={22} /></button>
+                       <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => handleActionNotImplemented('Sparkles React')}><Sparkles size={22} /></button>
                      </>
                    )}
                  </div>
@@ -166,7 +172,7 @@ export default function Chat() {
              </div>
              <h2 style={{ fontSize: '28px', fontWeight: 900 }}>Nexus Direct</h2>
              <p style={{ color: 'var(--text-muted)' }}>Initialize a skill exchange via secure direct frequency.</p>
-             <button className="btn-nebula" style={{ marginTop: '20px' }}>Initialize Channel</button>
+             <button className="btn-nebula" style={{ marginTop: '20px' }} onClick={() => handleActionNotImplemented('Initialize Channel')}>Initialize Channel</button>
           </div>
         )}
       </div>

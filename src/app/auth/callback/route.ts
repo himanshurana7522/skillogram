@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const requestUrl = request.nextUrl;
   const code = requestUrl.searchParams.get('code');
 
   if (code) {

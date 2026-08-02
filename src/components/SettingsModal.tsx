@@ -1,7 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import { ChevronRight, Shield, Archive, UserCog, Bell, Moon, LogOut, ArrowLeft } from 'lucide-react';
+import { ChevronRight, Shield, Archive, UserCog, Bell, Moon, LogOut, ArrowLeft, Trash2, AlertTriangle, UserX } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { useNotification } from '@/context/NotificationContext';
 import './SettingsModal.css';
 
 interface SettingsModalProps {
@@ -11,8 +13,20 @@ interface SettingsModalProps {
 
 export function SettingsModal({ onClose, isOpen }: SettingsModalProps) {
   const { theme, toggleTheme } = useTheme();
+  const { addNotification } = useNotification();
   const [notifications, setNotifications] = useState(true);
   const [activeMenu, setActiveMenu] = useState<'main' | 'archive' | 'privacy' | 'account'>('main');
+
+  const handleDeleteAccount = () => {
+    if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+      addNotification({ type: 'error', title: 'Account Deletion', message: 'Account deletion request submitted. Logging out...' });
+      setTimeout(() => signOut({ callbackUrl: '/login' }), 2000);
+    }
+  };
+
+  const handleNotImplemented = (feature: string) => {
+    addNotification({ type: 'system', title: 'Feature Disabled', message: `${feature} is currently under maintenance.` });
+  };
 
   if (!isOpen) return null;
 
@@ -87,7 +101,7 @@ export function SettingsModal({ onClose, isOpen }: SettingsModalProps) {
               ></div>
             </div>
 
-            <div className="setting-menu-item" style={{ color: '#FF3366', marginTop: '12px' }}>
+            <div className="setting-menu-item" style={{ color: '#FF3366', marginTop: '12px' }} onClick={() => signOut({ callbackUrl: '/login' })}>
               <div className="s-icon"><LogOut size={20} /></div>
               <span>Log Out</span>
             </div>
@@ -119,6 +133,16 @@ export function SettingsModal({ onClose, isOpen }: SettingsModalProps) {
               </div>
               <div className="toggle-switch active"></div>
             </div>
+            <div className="setting-menu-item" onClick={() => handleNotImplemented('Blocked Users')}>
+              <div className="s-icon"><UserX size={20} /></div>
+              <span>Blocked Users</span>
+              <ChevronRight className="chevron" size={20} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <div className="setting-menu-item" onClick={() => handleNotImplemented('Report History')}>
+              <div className="s-icon"><AlertTriangle size={20} /></div>
+              <span>Report History</span>
+              <ChevronRight className="chevron" size={20} style={{ color: 'var(--text-muted)' }} />
+            </div>
           </div>
         )}
 
@@ -131,12 +155,17 @@ export function SettingsModal({ onClose, isOpen }: SettingsModalProps) {
               </div>
               <ChevronRight className="chevron" size={20} style={{ color: 'var(--text-muted)' }} />
             </div>
-            <div className="setting-item">
+            <div className="setting-item" onClick={() => handleNotImplemented('Connected Accounts')}>
               <div className="setting-info">
                 <h4>Connected Accounts</h4>
                 <p>Manage Google and Facebook logins.</p>
               </div>
               <ChevronRight className="chevron" size={20} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '16px 0' }} />
+            <div className="setting-menu-item" style={{ color: '#FF3366' }} onClick={handleDeleteAccount}>
+              <div className="s-icon"><Trash2 size={20} /></div>
+              <span>Delete Account</span>
             </div>
           </div>
         )}

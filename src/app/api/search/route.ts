@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongoose';
@@ -6,11 +6,11 @@ import User from '@/models/User';
 import Room from '@/models/Room';
 import Post from '@/models/Post';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions as any); // Optional for search, but good for personalization
 
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const q = searchParams.get('q')?.toLowerCase() || '';
 
     await dbConnect();
@@ -109,7 +109,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   // Can be used to track analytics in the future
   return NextResponse.json({ success: true });
 }

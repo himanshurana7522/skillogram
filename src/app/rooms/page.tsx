@@ -4,6 +4,7 @@ import { Mic, MicOff, Video, VideoOff, ArrowLeft, Radio, MoreHorizontal, Message
 import { useUser } from '@/context/UserContext';
 import { useData } from '@/context/DataContext';
 import { DbRoom } from '@/lib/db';
+import { useNotification } from '@/context/NotificationContext';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
@@ -27,6 +28,7 @@ function RoomSkeleton() {
 export default function Rooms() {
   const { isInitializing, userProfile } = useUser();
   const { rooms } = useData();
+  const { addNotification } = useNotification();
   const [activeRoom, setActiveRoom] = useState<DbRoom | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(true);
@@ -71,8 +73,8 @@ export default function Rooms() {
            <button className="comms-action-icon" style={{ background: 'none', border: 'none', color: videoOn ? 'white' : 'var(--error)' }} onClick={() => setVideoOn(!videoOn)}>
              {videoOn ? <Video size={24} /> : <VideoOff size={24} />}
            </button>
-           <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => alert("Live Chat Panel opening...")}><MessageCircle size={24} /></button>
-           <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => alert("Sending Heart Reaction!")}><Heart size={24} /></button>
+           <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => addNotification({ type: 'system', title: 'Live Chat', message: 'Live chat panel is not yet initialized for this orbit.' })}><MessageCircle size={24} /></button>
+           <button className="comms-action-icon" style={{ background: 'none', border: 'none' }} onClick={() => addNotification({ type: 'success', title: 'Heart Sent', message: 'Reaction broadcasted to the orbit.' })}><Heart size={24} /></button>
            <Button variant="danger" onClick={() => setActiveRoom(null)}>DISCONNECT</Button>
         </footer>
       </div>

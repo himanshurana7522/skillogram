@@ -1,21 +1,60 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, Presentation, Shield, Code, Brush, LayoutGrid, ArrowRight } from 'lucide-react';
 import './communities.css';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/Button';
+import { useNotification } from '@/context/NotificationContext';
 
-const MOCK_COMMUNITIES = [
-  { id: 1, name: 'Frontend Alchemists', description: 'Advanced UI/UX, React, and motion design discussions for senior engineers.', members: 12500, active: 432, color: 'var(--accent-secondary)', icon: <LayoutGrid size={32} color="white" /> },
-  { id: 2, name: 'AI Nexus', description: 'Exploring LLMs, ML models, and prompt engineering strategies.', members: 8900, active: 890, color: 'var(--accent-primary)', icon: <Code size={32} color="white" /> },
-  { id: 3, name: 'Design Maestros', description: 'Share your Figma files, critique portfolios, and talk color theory.', members: 21000, active: 1100, color: '#F43F5E', icon: <Brush size={32} color="white" /> },
-  { id: 4, name: 'Backend Scalers', description: 'System design, database optimization, and high availability architectures.', members: 15400, active: 300, color: '#10B981', icon: <Shield size={32} color="white" /> }
-];
+interface CommunityData {
+  _id: string;
+  name: string;
+  description: string;
+  members: string[];
+  activeCount: number;
+  color: string;
+  icon: string;
+}
+
+const IconMap: Record<string, React.ElementType> = {
+  LayoutGrid: LayoutGrid,
+  Code: Code,
+  Brush: Brush,
+  Shield: Shield
+};
 
 export default function Communities() {
   const { isInitializing } = useUser();
+  const { addNotification } = useNotification();
+  const [communities, setCommunities] = useState<CommunityData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (isInitializing) {
+  useEffect(() => {
+    async function fetchCommunities() {
+      try {
+        const res = await fetch('/api/communities');
+        if (res.ok) {
+          const data = await res.json();
+          setCommunities(data.communities);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchCommunities();
+  }, []);
+
+  const handleNotImplemented = (featureName: string) => {
+    addNotification({
+      type: 'system',
+      title: 'Action Triggered',
+      message: `${featureName} is disabled in this environment.`
+    });
+  };
+
+  if (isInitializing || isLoading) {
     return <div className="communities-wrapper shimmer" style={{ height: '100vh', borderRadius: '20px' }} />;
   }
 
@@ -25,39 +64,42 @@ export default function Communities() {
         <h1>Professional Communities</h1>
         <p>Join highly specialized skill groups to level up your craft and expand your orbital network.</p>
         <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
-          <Button onClick={() => alert("Loading discovery algorithm...")}>Discover Groups</Button>
-          <Button variant="secondary" onClick={() => alert("Loading your saved networks...")}>Your Networks</Button>
+          <Button onClick={() => handleNotImplemented("Discovery Algorithm")}>Discover Groups</Button>
+          <Button variant="secondary" onClick={() => handleNotImplemented("Saved Networks")}>Your Networks</Button>
         </div>
       </header>
 
       <div className="community-grid">
-        {MOCK_COMMUNITIES.map(comm => (
-          <div key={comm.id} className="community-card glass-pane" onClick={() => alert(`Entering ${comm.name} community hub...`)}>
-            <div className="community-banner" style={{ background: `linear-gradient(135deg, ${comm.color}, #08080C)` }}>
-              <div className="community-banner-overlay" />
-              <div className="community-icon-container" style={{ background: comm.color }}>
-                {comm.icon}
+        {communities.map(comm => {
+          const IconComponent = IconMap[comm.icon] || Users;
+          return (
+            <div key={comm._id} className="community-card glass-pane" onClick={() => handleNotImplemented(`Join ${comm.name}`)}>
+              <div className="community-banner" style={{ background: `linear-gradient(135deg, ${comm.color}, #08080C)` }}>
+                <div className="community-banner-overlay" />
+                <div className="community-icon-container" style={{ background: comm.color }}>
+                  <IconComponent size={32} color="white" />
+                </div>
+              </div>
+              
+              <div className="community-content">
+                <h3>{comm.name}</h3>
+                <p>{comm.description}</p>
+              </div>
+              
+              <div className="community-meta">
+                <div className="meta-item">
+                  <Users size={16} /> <span>{comm.members.length.toLocaleString()} Skillers</span>
+                </div>
+                <div className="meta-item" style={{ color: 'var(--accent-tertiary)' }}>
+                  <Presentation size={16} /> <span>{comm.activeCount} Live</span>
+                </div>
+                <div style={{ marginLeft: 'auto' }}>
+                   <ArrowRight size={20} color="var(--text-muted)" />
+                </div>
               </div>
             </div>
-            
-            <div className="community-content">
-              <h3>{comm.name}</h3>
-              <p>{comm.description}</p>
-            </div>
-            
-            <div className="community-meta">
-              <div className="meta-item">
-                <Users size={16} /> <span>{comm.members.toLocaleString()} Skillers</span>
-              </div>
-              <div className="meta-item" style={{ color: 'var(--accent-tertiary)' }}>
-                <Presentation size={16} /> <span>{comm.active} Live</span>
-              </div>
-              <div style={{ marginLeft: 'auto' }}>
-                 <ArrowRight size={20} color="var(--text-muted)" />
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

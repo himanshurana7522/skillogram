@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useNotification } from '@/context/NotificationContext';
 import './login.css';
 
 export default function LoginPage() {
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
+  const { addNotification } = useNotification();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,20 +31,36 @@ export default function LoginPage() {
 
       if (res?.error) {
         setError(res.error);
-        alert(`Auth Failed: ${res.error}`);
+        addNotification({
+          type: 'error',
+          title: 'Authentication Failed',
+          message: res.error
+        });
       } else {
         if (!isLogin) {
           setSuccess("Account created! You are now logged in.");
-          alert("Success! Account created. You are now logged in.");
+          addNotification({
+            type: 'success',
+            title: 'Welcome to Skillogram',
+            message: 'Account created successfully.'
+          });
         } else {
-          alert("Login successful! Redirecting...");
+          addNotification({
+            type: 'success',
+            title: 'Welcome Back',
+            message: 'Login successful! Redirecting...'
+          });
         }
         router.push('/');
       }
     } catch (err: unknown) {
       console.error("[CRASH]:", err);
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`A system error occurred: ${msg}`);
+      addNotification({
+        type: 'error',
+        title: 'System Error',
+        message: msg
+      });
       setError(`An unexpected error occurred: ${msg}`);
     } finally {
       setIsLoading(false);

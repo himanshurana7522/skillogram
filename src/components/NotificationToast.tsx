@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useNotification, AppNotification } from '@/context/NotificationContext';
-import { MessageSquare, Flame, X } from 'lucide-react';
+import { MessageSquare, Flame, X, Check } from 'lucide-react';
 
 export function NotificationToast() {
   const { notifications } = useNotification();
@@ -25,7 +25,11 @@ export function NotificationToast() {
 
   if (!currentNotif || !isVisible) return null;
 
-  const Icon = currentNotif.type === 'match' ? Flame : MessageSquare;
+  let Icon = MessageSquare;
+  if (currentNotif.type === 'match') Icon = Flame;
+  if (currentNotif.type === 'error') Icon = X;
+  if (currentNotif.type === 'system') Icon = MessageSquare;
+  if (currentNotif.type === 'success') Icon = Check;
 
   return (
     <div className="toast-container animate-slide-in-right glass-pane">
@@ -67,6 +71,9 @@ export function NotificationToast() {
         }
         .toast-icon-bg.match { background: linear-gradient(135deg, #FF3366, #FF9933); }
         .toast-icon-bg.message { background: linear-gradient(135deg, #00D1FF, #2D8CFF); }
+        .toast-icon-bg.error { background: linear-gradient(135deg, #ff4d4d, #cc0000); }
+        .toast-icon-bg.success { background: linear-gradient(135deg, #00cc66, #009933); }
+        .toast-icon-bg.system { background: linear-gradient(135deg, #9933ff, #6600cc); }
         
         .toast-body { flex: 1; }
         .toast-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; color: white; }

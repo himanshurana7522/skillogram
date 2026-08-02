@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NewRoomModal } from './NewRoomModal';
 import { PulseCreator } from './social/PulseCreator';
+import { SettingsModal } from './SettingsModal';
 import { Home, Compass, User, MessageCircle, Video, Search, X, PlusSquare, Plus, Menu, LayoutGrid, Heart, Film } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
 import './Navigation.css';
@@ -13,6 +14,7 @@ export function Navigation() {
   const [isPulseCreatorOpen, setIsPulseCreatorOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { unreadCount, notifications, markNotificationsAsRead } = useNotification();
   const pathname = usePathname();
 
@@ -138,7 +140,7 @@ export function Navigation() {
            <Link href="/rooms" className="hamburger-link" onClick={() => setShowMobileMenu(false)}>
              <Video size={28} color="var(--accent-secondary)" /> <span>Live Workshops</span>
            </Link>
-           <div className="hamburger-link" onClick={() => { setShowMobileMenu(false); alert("Settings Module Opening..."); }}>
+           <div className="hamburger-link" onClick={() => { setShowMobileMenu(false); setShowSettings(true); }}>
              <User size={28} color="var(--accent-tertiary)" /> <span>Preferences</span>
            </div>
         </div>
@@ -155,6 +157,7 @@ export function Navigation() {
 
       <NewRoomModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <PulseCreator isOpen={isPulseCreatorOpen} onClose={() => setIsPulseCreatorOpen(false)} />
+      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </>
   );
 }
