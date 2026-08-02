@@ -12,7 +12,18 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== "") {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL && process.env.VERCEL_URL !== "") {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(getBaseUrl()),
   title: "Skillogram",
   description: "The ultimate platform for skill exchange and growth.",
 };
